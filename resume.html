@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grigory Shatalin — Resume</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+
+    <header>
+      <div class="header-row">
+        <div>
+          <a href="index.html" class="name-link"><h1 class="name">Grigory Shatalin</h1></a>
+          <p class="role">Software Engineer</p>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+      <nav class="site-nav">
+        <a href="index.html" class="nav-link">About</a>
+        <a href="resume.html" class="nav-link active">Resume</a>
+        <a href="interests.html" class="nav-link">Interests</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="social.html" class="nav-link">Social</a>
+      </nav>
+    </header>
+
+    <section>
+      <h2 class="section-title">Resume / CV</h2>
+      <p class="bio" style="margin-bottom: 20px;">A full record of my education, experience, and skills. Download the PDF directly if the embed doesn't load in your browser.</p>
+      <iframe
+        src="resume.pdf"
+        class="resume-embed"
+        title="Grigory Shatalin Resume"
+      ></iframe>
+      <p class="resume-fallback">
+        Can't see the embed? <a href="resume.pdf" target="_blank" rel="noopener noreferrer">Open the PDF directly ↗</a>
+      </p>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

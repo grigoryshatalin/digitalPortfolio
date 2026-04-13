@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grigory Shatalin</title>
+  <title>Grigory Shatalin — About</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
     <header>
       <div class="header-row">
         <div>
-          <h1 class="name">Grigory Shatalin</h1>
+          <a href="index.html" class="name-link"><h1 class="name">Grigory Shatalin</h1></a>
           <p class="role">Software Engineer</p>
         </div>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -27,81 +27,45 @@
           </svg>
         </button>
       </div>
+      <nav class="site-nav">
+        <a href="index.html" class="nav-link active">About</a>
+        <a href="resume.html" class="nav-link">Resume</a>
+        <a href="interests.html" class="nav-link">Interests</a>
+        <a href="projects.html" class="nav-link">Projects</a>
+        <a href="social.html" class="nav-link">Social</a>
+      </nav>
     </header>
 
     <section>
-      <h2 class="section-title">Today</h2>
+      <img src="images/profile.jpg" alt="Grigory Shatalin" class="hero-img" />
+    </section>
+
+    <section>
+      <h2 class="section-title">About Me</h2>
       <p class="bio">
-        Building at <a href="https://www.circle.com" class="link" target="_blank" rel="noopener noreferrer">Circle</a>.
-        Working with <a href="https://www.arc.network/" class="link" target="_blank" rel="noopener noreferrer">ARC</a> on chain.
+        My name is Grigory Shatalin, and I'm a software engineer with a passion for building at the intersection of technology and finance. I currently work at Circle, one of the world's leading financial technology companies and the issuer of USDC, where I contribute to infrastructure powering the global movement of digital currency. Alongside that, I collaborate with ARC, a blockchain-native organization pushing the boundaries of on-chain finance and decentralized systems.
+      </p>
+      <br />
+      <p class="bio">
+        My engineering journey started with a deep curiosity for how systems work under the hood — from web applications to distributed protocols. Over time, that curiosity evolved into a career spanning full-stack development, open-source contribution, and applied artificial intelligence. I believe the most interesting technical problems live at the boundaries between disciplines: between software and finance, between raw data and meaningful decision-making, between individual tools and infrastructure that operates at global scale.
+      </p>
+      <br />
+      <p class="bio">
+        Beyond writing code, I'm a competitive water polo player, a hackathon enthusiast, and an active contributor to the crypto and blockchain community. I've shipped AI-powered web applications, contributed production-quality code to Microsoft's open-source ecosystem, and built market analytics tools on top of regulated prediction markets. Each project has expanded my understanding of what it means to create software that solves real problems for real people.
+      </p>
+      <br />
+      <p class="bio">
+        I'm also a committed traveler. Spending time in countries across Europe, Asia, and the Americas has shaped my perspective on how technology intersects with culture, commerce, and everyday life. Seeing how different societies handle payments, banking, and digital access has deepened my commitment to working on tools — like stablecoins and open financial protocols — that can make global economic participation more equitable.
+      </p>
+      <br />
+      <p class="bio">
+        This portfolio is the most complete picture I can offer of who I am and what I build. You'll find projects that reflect my technical range, interests that reveal what drives me outside of work, and a career story still very much in progress. Whether you're a recruiter, a potential collaborator, or a fellow builder — welcome. I'm glad you're here.
       </p>
     </section>
 
     <section>
-      <h2 class="section-title">Projects / Work</h2>
-      <div class="item-list">
-
-        <a class="item" href="https://github.com/grigoryshatalin/BuffAI" target="_blank" rel="noopener noreferrer">
-          <div class="item-content">
-            <span class="item-title">BuffAI</span>
-            <span class="item-desc">Full-stack AI web application built with JavaScript, Python, and Handlebars.</span>
-          </div>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-
-        <a class="item" href="https://github.com/grigoryshatalin/powerbi-visuals-heatmap" target="_blank" rel="noopener noreferrer">
-          <div class="item-content">
-            <span class="item-title">Power BI Heatmap</span>
-            <span class="item-desc">Contributed to Microsoft's open-source Power BI custom visual for heatmap data visualization.</span>
-          </div>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-
-        <a class="item" href="https://github.com/grigoryshatalin/KalshiNFL" target="_blank" rel="noopener noreferrer">
-          <div class="item-content">
-            <span class="item-title">KalshiNFL</span>
-            <span class="item-desc">Tool built on Kalshi's prediction markets API for tracking NFL game odds.</span>
-          </div>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-
-      </div>
-    </section>
-
-    <section>
-      <h2 class="section-title">More</h2>
-      <div class="item-list">
-        <a class="item" href="https://github.com/grigoryshatalin" target="_blank" rel="noopener noreferrer">
-          <span class="item-title">GitHub</span>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-        <a class="item" href="https://x.com/g_shatalin" target="_blank" rel="noopener noreferrer">
-          <span class="item-title">X / Twitter</span>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-        <a class="item" href="https://www.linkedin.com/in/grigory-shatalin/" target="_blank" rel="noopener noreferrer">
-          <span class="item-title">LinkedIn</span>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-        <a class="item" href="mailto:grshatalin@outlook.com">
-          <span class="item-title">Email</span>
-          <svg class="item-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-          </svg>
-        </a>
-      </div>
+      <img src="images/interests.jpg" alt="Life beyond the terminal" class="hero-img" />
+      <p class="caption">Life beyond the terminal — sport, travel, and the communities that keep things interesting.</p>
     </section>
 
   </main>
