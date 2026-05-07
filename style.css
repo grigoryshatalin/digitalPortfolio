@@ -92,7 +92,7 @@ main {
   padding: 13vh 32px 16vh;
   display: flex;
   flex-direction: column;
-  gap: 13vh;
+  gap: 11vh;
 }
 
 /* ================================================================
@@ -109,6 +109,24 @@ main {
   0%   { opacity: 0; transform: translate3d(0, 18px, 0); }
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
+
+/* ================================================================
+   Decode targets — JS scrambles + locks them char-by-char on reveal.
+   While decoding, render in mono so glyph widths are stable.
+================================================================ */
+[data-decode] {
+  font-variant-ligatures: none;
+}
+[data-decode].is-decoding {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+  letter-spacing: 0 !important;
+  color: var(--accent);
+  transition: color 0.5s ease 0.2s;
+}
+[data-decode]:not(.is-decoding):not(.is-pending) {
+  color: inherit;
+}
+[data-decode].is-pending { opacity: 0; }
 
 /* ================================================================
    Header
@@ -147,7 +165,7 @@ header { display: flex; flex-direction: column; gap: 56px; }
 [data-theme="dark"]  .icon-sun  { display: none; }
 
 /* ================================================================
-   Boot terminal — sequential typing
+   Boot terminal
 ================================================================ */
 .boot {
   display: flex;
@@ -162,11 +180,10 @@ header { display: flex; flex-direction: column; gap: 56px; }
 
 .boot-line {
   display: block;
-  min-height: 1.2em; /* reserve space so layout doesn't shift while typing */
+  min-height: 1.2em;
   white-space: pre;
 }
 
-/* Blinking caret while a line is mid-type */
 .boot-line.is-typing::after {
   content: "▍";
   display: inline-block;
@@ -176,7 +193,6 @@ header { display: flex; flex-direction: column; gap: 56px; }
   transform: translateY(0.05em);
 }
 
-/* The final prompt line keeps a persistent caret after typing finishes */
 .boot-line.is-prompt.is-done::after {
   content: "";
   display: inline-block;
@@ -194,7 +210,7 @@ header { display: flex; flex-direction: column; gap: 56px; }
 }
 
 /* ================================================================
-   Display headline — types in
+   Display headline
 ================================================================ */
 .display {
   font-family: "Inter", sans-serif;
@@ -226,7 +242,7 @@ header { display: flex; flex-direction: column; gap: 56px; }
 }
 
 /* ================================================================
-   Lede — fades in after boot completes
+   Lede
 ================================================================ */
 .lede {
   font-size: clamp(1.05rem, 1.4vw, 1.2rem);
@@ -271,6 +287,7 @@ header { display: flex; flex-direction: column; gap: 56px; }
   color: var(--mute);
   font-weight: 500;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .kicker-rule {
@@ -369,6 +386,55 @@ header { display: flex; flex-direction: column; gap: 56px; }
 .row:hover .row-arrow svg { transform: translate(2px, -2px); }
 
 /* ================================================================
+   Stack — terminal-style key/value list
+================================================================ */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.stack-row {
+  display: grid;
+  grid-template-columns: 13ch 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+.stack-row dt {
+  color: var(--mute);
+  letter-spacing: 0.02em;
+}
+.stack-row dd {
+  color: var(--text);
+  letter-spacing: 0.005em;
+}
+
+/* ================================================================
+   Approach — short principles list
+================================================================ */
+.principles {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.principles li {
+  position: relative;
+  padding-left: 22px;
+}
+.principles li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
+
+/* ================================================================
    Elsewhere
 ================================================================ */
 .links-list {
@@ -395,9 +461,22 @@ header { display: flex; flex-direction: column; gap: 56px; }
 .text-link:hover { color: var(--accent); background-size: 100% 1px; }
 
 /* ================================================================
+   Colophon
+================================================================ */
+.colophon {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  color: var(--soft);
+  line-height: 1.6;
+}
+
+/* ================================================================
    Footer
 ================================================================ */
-footer { padding-top: 32px; }
+footer { padding-top: 16px; }
 
 .signoff {
   display: inline-flex;
@@ -428,7 +507,7 @@ footer { padding-top: 32px; }
 @media (max-width: 640px) {
   main {
     padding: 9vh 22px 12vh;
-    gap: 11vh;
+    gap: 9vh;
   }
   header { gap: 42px; }
   .display { font-size: clamp(2.85rem, 14vw, 5rem); }
@@ -436,6 +515,8 @@ footer { padding-top: 32px; }
   .row-title { font-size: 1.2rem; }
   .lede { font-size: 1.02rem; }
   .links-list { gap: 4px 22px; }
+  .stack-row { grid-template-columns: 11ch 1fr; gap: 8px; }
+  .stack { font-size: 0.78rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
