@@ -116,17 +116,14 @@ main {
 ================================================================ */
 [data-decode] {
   font-variant-ligatures: none;
+  transition: color 0.5s ease;
 }
 [data-decode].is-decoding {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
   letter-spacing: 0 !important;
   color: var(--accent);
-  transition: color 0.5s ease 0.2s;
+  transition: color 0s;
 }
-[data-decode]:not(.is-decoding):not(.is-pending) {
-  color: inherit;
-}
-[data-decode].is-pending { opacity: 0; }
 
 /* ================================================================
    Header

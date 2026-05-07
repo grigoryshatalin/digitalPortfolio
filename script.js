@@ -30,7 +30,11 @@
     scope.querySelectorAll("[data-decode]").forEach((el) => {
       if (el.dataset.original !== undefined) return;
       el.dataset.original = el.textContent;
-      // Pre-fill with placeholder to preserve layout width
+
+      // Only pre-blank elements that will decode on reveal (inside .reveal).
+      // Elements outside .reveal keep their text and only glitch on hover.
+      if (!el.closest(".reveal")) return;
+
       let placeholder = "";
       for (let i = 0; i < el.dataset.original.length; i++) {
         const ch = el.dataset.original[i];
@@ -43,8 +47,11 @@
   function decodeInto(el, finalText, durPerChar = 38) {
     const len = finalText.length;
     if (len === 0) return;
+    if (el.dataset.glitching === "1") return; // prevent overlapping animations
+    el.dataset.glitching = "1";
+
     const start = performance.now();
-    const totalDur = len * durPerChar + 220;
+    const totalDur = len * durPerChar + 180;
     el.classList.add("is-decoding");
 
     function step(now) {
@@ -53,13 +60,10 @@
       for (let i = 0; i < len; i++) {
         const lockAt = i * durPerChar;
         const ch = finalText[i];
-        if (elapsed >= lockAt + 60 || ch === " " || ch === "\n") {
+        if (elapsed >= lockAt + 50 || ch === " " || ch === "\n") {
           out += ch;
-        } else if (elapsed >= lockAt - 80) {
-          out += randomChar();
         } else {
-          // Pre-lock: keep cycling at lower frequency
-          out += Math.random() < 0.4 ? randomChar() : (el.textContent[i] || randomChar());
+          out += randomChar();
         }
       }
       el.textContent = out;
@@ -68,9 +72,31 @@
       } else {
         el.textContent = finalText;
         el.classList.remove("is-decoding");
+        el.dataset.glitching = "0";
       }
     }
     requestAnimationFrame(step);
+  }
+
+  // Faster, snappier glitch used on hover.
+  function glitchHover(el) {
+    const text = el.dataset.original;
+    if (!text) return;
+    decodeInto(el, text, 16);
+  }
+
+  function setupHoverGlitch() {
+    // Direct: each [data-decode] glitches on its own hover.
+    document.querySelectorAll("[data-decode]").forEach((el) => {
+      el.addEventListener("pointerenter", () => glitchHover(el));
+    });
+
+    // Container: hovering anywhere on a .row glitches its row-num + row-title.
+    document.querySelectorAll(".row").forEach((row) => {
+      row.addEventListener("pointerenter", () => {
+        row.querySelectorAll("[data-decode]").forEach((t) => glitchHover(t));
+      });
+    });
   }
 
   function decodeSection(section, baseDelay = 180) {
@@ -120,6 +146,7 @@
   async function bootSequence() {
     // Pre-blank decode targets immediately so they don't flash real text
     prepDecodeTargets();
+    setupHoverGlitch();
 
     if (reduceMotion) {
       document.querySelectorAll(".boot-line, .display-line").forEach((el) => {
