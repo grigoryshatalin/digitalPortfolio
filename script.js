@@ -24,117 +24,83 @@
   );
   document.querySelectorAll(".animate-in").forEach((el) => observer.observe(el));
 
-  // Sand particle animation
+  // Dot grid — cursor reveals hidden structure like a flashlight
   const canvas = document.getElementById("bg-canvas");
   const ctx = canvas.getContext("2d");
 
-  const N = 150;
-  let particles = [];
+  const SPACING = 32;
+  const REVEAL_R = 185;
+  const R2 = REVEAL_R * REVEAL_R;
+  const SIGMA_SQ = (REVEAL_R / 2.2) ** 2;
+  const DECAY = 0.91;   // how fast dots fade after cursor leaves
+  const RISE  = 0.18;   // how fast dots illuminate as cursor approaches
+
   let mouseX = -9999;
   let mouseY = -9999;
-  let mouseVX = 0;
-  let mouseVY = 0;
+  let cols = 0;
+  let rows = 0;
+  let brightness; // Float32Array — current brightness per dot
+  let dotR;       // Float32Array — slight random size per dot
 
   function isDark() {
     return root.getAttribute("data-theme") === "dark";
   }
 
-  function sandColor(a) {
-    return isDark()
-      ? `rgba(210, 185, 135, ${a})`
-      : `rgba(125, 100, 58, ${a})`;
+  function setupGrid() {
+    cols = Math.ceil(canvas.width  / SPACING) + 2;
+    rows = Math.ceil(canvas.height / SPACING) + 2;
+    const n = cols * rows;
+    brightness = new Float32Array(n);
+    dotR = new Float32Array(n);
+    for (let k = 0; k < n; k++) dotR[k] = 0.8 + Math.random() * 0.55;
   }
 
   function resize() {
-    canvas.width = window.innerWidth;
+    canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
-  }
-
-  function makeParticle() {
-    return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.3 + 0.5,
-      alpha: Math.random() * 0.35 + 0.1,
-      alphaDir: Math.random() > 0.5 ? 1 : -1,
-      alphaSpeed: Math.random() * 0.007 + 0.002,
-    };
-  }
-
-  function init() {
-    resize();
-    particles = Array.from({ length: N }, makeParticle);
+    setupGrid();
   }
 
   function tick() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Decay mouse velocity between frames
-    mouseVX *= 0.78;
-    mouseVY *= 0.78;
+    const dark     = isDark();
+    const rgb      = dark ? "245,244,244" : "10,10,10";
+    const maxAlpha = dark ? 0.88 : 0.65;
 
-    const INFLUENCE = 105;
-    const mouseSpeed = Math.hypot(mouseVX, mouseVY);
+    for (let i = 0; i < cols; i++) {
+      const gx = i * SPACING;
+      for (let j = 0; j < rows; j++) {
+        const idx = i * rows + j;
+        const gy  = j * SPACING;
 
-    for (const p of particles) {
-      // Push particle in direction of mouse movement
-      if (mouseX !== -9999) {
-        const dx = p.x - mouseX;
-        const dy = p.y - mouseY;
-        const d = Math.hypot(dx, dy);
-        if (d < INFLUENCE && d > 0 && mouseSpeed > 0.4) {
-          const f = (1 - d / INFLUENCE) * 0.65;
-          p.vx += (mouseVX / mouseSpeed) * f;
-          p.vy += (mouseVY / mouseSpeed) * f;
+        // Gaussian brightness target based on distance to cursor
+        let target = 0;
+        if (mouseX !== -9999) {
+          const dx = gx - mouseX;
+          const dy = gy - mouseY;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < R2) target = Math.exp(-d2 / (2 * SIGMA_SQ));
         }
+
+        // Approach target: quick rise, slow decay
+        let b = brightness[idx];
+        b = target > b ? b + (target - b) * RISE : b * DECAY;
+        brightness[idx] = b;
+
+        if (b < 0.004) continue;
+
+        ctx.beginPath();
+        ctx.arc(gx, gy, dotR[idx], 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb},${b * maxAlpha})`;
+        ctx.fill();
       }
-
-      // Gentle random micro-drift + very slight gravity
-      p.vx += (Math.random() - 0.5) * 0.014;
-      p.vy += (Math.random() - 0.5) * 0.014 + 0.003;
-
-      // Dampen
-      p.vx *= 0.94;
-      p.vy *= 0.94;
-
-      // Clamp speed
-      const spd = Math.hypot(p.vx, p.vy);
-      const MAX = 2.8;
-      if (spd > MAX) {
-        p.vx = (p.vx / spd) * MAX;
-        p.vy = (p.vy / spd) * MAX;
-      }
-
-      p.x += p.vx;
-      p.y += p.vy;
-
-      // Wrap edges
-      if (p.x < -4) p.x = canvas.width + 4;
-      else if (p.x > canvas.width + 4) p.x = -4;
-      if (p.y < -4) p.y = canvas.height + 4;
-      else if (p.y > canvas.height + 4) p.y = -4;
-
-      // Twinkle
-      p.alpha += p.alphaDir * p.alphaSpeed;
-      if (p.alpha > 0.52) { p.alpha = 0.52; p.alphaDir = -1; }
-      if (p.alpha < 0.07) { p.alpha = 0.07; p.alphaDir = 1; }
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = sandColor(p.alpha);
-      ctx.fill();
     }
 
     requestAnimationFrame(tick);
   }
 
   document.addEventListener("mousemove", (e) => {
-    if (mouseX !== -9999) {
-      mouseVX = e.clientX - mouseX;
-      mouseVY = e.clientY - mouseY;
-    }
     mouseX = e.clientX;
     mouseY = e.clientY;
   });
@@ -142,11 +108,10 @@
   document.addEventListener("mouseleave", () => {
     mouseX = -9999;
     mouseY = -9999;
-    mouseVX = 0;
-    mouseVY = 0;
   });
 
   window.addEventListener("resize", resize);
-  init();
+
+  resize();
   tick();
 })();
