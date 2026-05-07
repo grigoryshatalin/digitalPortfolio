@@ -19,7 +19,8 @@
   --line:      rgba(13, 14, 16, 0.10);
   --line-hi:   rgba(13, 14, 16, 0.22);
   --accent:    #d44a17;
-  --field-rgb: 13, 14, 16;
+  --field-rgb:   138, 144, 156;
+  --buffalo-rgb: 30, 32, 38;
 }
 
 [data-theme="dark"] {
@@ -31,7 +32,8 @@
   --line:      rgba(244, 243, 239, 0.08);
   --line-hi:   rgba(244, 243, 239, 0.22);
   --accent:    #ff9b5a;
-  --field-rgb: 244, 243, 239;
+  --field-rgb:   244, 243, 239;
+  --buffalo-rgb: 244, 243, 239;
 }
 
 /* ================================================================
@@ -267,6 +269,48 @@ header { display: flex; flex-direction: column; gap: 56px; }
 .link:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ================================================================
+   Top links bar — quick access in the hero
+================================================================ */
+.top-links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1);
+}
+.top-links.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.top-link {
+  position: relative;
+  color: var(--soft);
+  text-decoration: none;
+  padding: 4px 0;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: color 0.4s ease, background-size 0.55s cubic-bezier(0.16,1,0.3,1);
+}
+.top-link::before {
+  content: "→";
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--mute);
+  transition: color 0.4s ease, transform 0.4s ease;
+}
+.top-link:hover { color: var(--accent); background-size: 100% 1px; }
+.top-link:hover::before { color: var(--accent); transform: translateX(2px); }
+
+/* ================================================================
    Section head
 ================================================================ */
 .section-head {
@@ -323,7 +367,7 @@ header { display: flex; flex-direction: column; gap: 56px; }
   bottom: -1px;
   height: 1px;
   width: 100%;
-  background: var(--text);
+  background: var(--accent);
   transform: scaleX(0);
   transform-origin: 0 50%;
   transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
@@ -378,9 +422,128 @@ header { display: flex; flex-direction: column; gap: 56px; }
 }
 .row-arrow svg { transition: transform 0.55s cubic-bezier(0.16,1,0.3,1); }
 
-.row:hover .row-num   { color: var(--text); }
-.row:hover .row-arrow { color: var(--text); border-color: var(--text); }
+.row:hover .row-num,
+.row:hover .row-title  { color: var(--accent); }
+.row:hover .row-arrow  { color: var(--accent); border-color: var(--accent); }
 .row:hover .row-arrow svg { transform: translate(2px, -2px); }
+
+/* ================================================================
+   Entries (Education, Experience)
+================================================================ */
+.entries {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.entry {
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+.entries li:last-child { border-bottom: 1px solid var(--line); }
+
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.entry-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.entry-title {
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.entry-org {
+  font-size: 0.92rem;
+  color: var(--soft);
+  letter-spacing: -0.005em;
+}
+
+.entry-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  color: var(--mute);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-loc { color: var(--accent); }
+
+.entry-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  margin-top: 14px;
+}
+
+.entry-bullets li {
+  position: relative;
+  font-size: 0.92rem;
+  color: var(--soft);
+  line-height: 1.55;
+}
+
+.entry-bullets li::before {
+  content: "·";
+  position: absolute;
+  left: -14px;
+  top: -3px;
+  color: var(--accent);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+/* ================================================================
+   Buffalo (particle constellation)
+================================================================ */
+.buffalo-stage {
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 1.15 / 1;
+  margin: 0 auto 36px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#buffalo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.buffalo-caption {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--mute);
+  white-space: nowrap;
+}
 
 /* ================================================================
    Stack — terminal-style key/value list
@@ -514,6 +677,9 @@ footer { padding-top: 16px; }
   .links-list { gap: 4px 22px; }
   .stack-row { grid-template-columns: 11ch 1fr; gap: 8px; }
   .stack { font-size: 0.78rem; }
+  .entry-head { flex-direction: column; gap: 8px; }
+  .entry-meta { align-items: flex-start; flex-direction: row; gap: 12px; flex-wrap: wrap; }
+  .buffalo-stage { max-width: 320px; margin-bottom: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -522,6 +688,12 @@ footer { padding-top: 16px; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-  #field { display: none; }
+  #field, #buffalo { display: none; }
   .lede, .reveal { opacity: 1 !important; transform: none !important; }
+  .buffalo-stage::before {
+    content: "🦬";
+    font-size: 7rem;
+    line-height: 1;
+    opacity: 0.55;
+  }
 }

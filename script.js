@@ -31,9 +31,10 @@
       if (el.dataset.original !== undefined) return;
       el.dataset.original = el.textContent;
 
-      // Only pre-blank elements that will decode on reveal (inside .reveal).
-      // Elements outside .reveal keep their text and only glitch on hover.
-      if (!el.closest(".reveal")) return;
+      // Pre-blank elements that animate in: inside .reveal sections, or
+      // the top-links nav (which has its own deferred reveal in bootSequence).
+      // Everything else keeps its text and only glitches on link hover.
+      if (!el.closest(".reveal") && !el.closest(".top-links")) return;
 
       let placeholder = "";
       for (let i = 0; i < el.dataset.original.length; i++) {
@@ -86,15 +87,12 @@
   }
 
   function setupHoverGlitch() {
-    // Direct: each [data-decode] glitches on its own hover.
-    document.querySelectorAll("[data-decode]").forEach((el) => {
-      el.addEventListener("pointerenter", () => glitchHover(el));
-    });
-
-    // Container: hovering anywhere on a .row glitches its row-num + row-title.
-    document.querySelectorAll(".row").forEach((row) => {
-      row.addEventListener("pointerenter", () => {
-        row.querySelectorAll("[data-decode]").forEach((t) => glitchHover(t));
+    // Only links glitch on hover. Hovering an anchor scrambles every
+    // [data-decode] descendant (row-num, row-title, the link's own text, etc).
+    document.querySelectorAll("a").forEach((a) => {
+      a.addEventListener("pointerenter", () => {
+        if (a.hasAttribute("data-decode")) glitchHover(a);
+        a.querySelectorAll("[data-decode]").forEach((t) => glitchHover(t));
       });
     });
   }
@@ -157,6 +155,7 @@
         el.textContent = el.dataset.original || el.textContent;
       });
       document.querySelector(".lede")?.classList.add("is-visible");
+      document.querySelector(".top-links")?.classList.add("is-visible");
       document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
       return;
     }
@@ -182,6 +181,18 @@
     await sleep(160);
 
     document.querySelector(".lede")?.classList.add("is-visible");
+
+    // Top-links: fade in just after the lede settles, then decode each
+    // entry left-to-right so they arrive deliberately, not all at once.
+    await sleep(360);
+    const topLinks = document.querySelector(".top-links");
+    if (topLinks) {
+      topLinks.classList.add("is-visible");
+      const linkTargets = topLinks.querySelectorAll("[data-decode]");
+      linkTargets.forEach((t, i) => {
+        setTimeout(() => decodeInto(t, t.dataset.original || t.textContent, 30), 280 + i * 95);
+      });
+    }
 
     startSectionObserver();
   }
@@ -423,4 +434,244 @@
 
   resize();
   raf = requestAnimationFrame(tick);
+
+  /* ================================================================
+     Buffalo — particles assemble into a 🦬 silhouette
+     - Sample alpha from a large emoji rendered to an offscreen canvas
+     - Each sampled pixel becomes a particle target
+     - Particles ease in from random positions and gently breathe in place
+  ================================================================ */
+  initBuffalo();
+
+  function initBuffalo() {
+    const bcanvas = document.getElementById("buffalo");
+    if (!bcanvas) return;
+    const bctx = bcanvas.getContext("2d");
+
+    const SAMPLE_RES = 360;
+    let bW = 0, bH = 0, bDPR = 1;
+    let targetPoints = [];
+    let buffaloAspect = 1;
+    let bparticles = [];
+    let startTime = 0;
+    let visible = false;
+    let braf;
+
+    function buildTargets() {
+      const off = document.createElement("canvas");
+      off.width = off.height = SAMPLE_RES;
+      const octx = off.getContext("2d");
+      octx.fillStyle = "#000";
+      const px = Math.floor(SAMPLE_RES * 0.78);
+      octx.font = px + 'px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "EmojiOne Color", "Twemoji Mozilla", sans-serif';
+      octx.textBaseline = "middle";
+      octx.textAlign = "center";
+      octx.fillText("🦬", SAMPLE_RES / 2, SAMPLE_RES / 2);
+
+      const data = octx.getImageData(0, 0, SAMPLE_RES, SAMPLE_RES).data;
+
+      let minX = SAMPLE_RES, minY = SAMPLE_RES, maxX = 0, maxY = 0;
+      let hits = 0;
+      for (let y = 0; y < SAMPLE_RES; y++) {
+        for (let x = 0; x < SAMPLE_RES; x++) {
+          if (data[(y * SAMPLE_RES + x) * 4 + 3] > 90) {
+            hits++;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      // Fallback: if the platform rendered no emoji glyph, draw a CU monogram
+      if (hits < 200) {
+        octx.clearRect(0, 0, SAMPLE_RES, SAMPLE_RES);
+        octx.fillStyle = "#000";
+        octx.font = "700 " + Math.floor(SAMPLE_RES * 0.6) + 'px "Inter", sans-serif';
+        octx.textBaseline = "middle";
+        octx.textAlign = "center";
+        octx.fillText("CU", SAMPLE_RES / 2, SAMPLE_RES / 2);
+        const d2 = octx.getImageData(0, 0, SAMPLE_RES, SAMPLE_RES).data;
+        minX = SAMPLE_RES; minY = SAMPLE_RES; maxX = 0; maxY = 0;
+        for (let y = 0; y < SAMPLE_RES; y++) {
+          for (let x = 0; x < SAMPLE_RES; x++) {
+            if (d2[(y * SAMPLE_RES + x) * 4 + 3] > 90) {
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+        const bwSrc = maxX - minX, bhSrc = maxY - minY;
+        buffaloAspect = bwSrc / bhSrc;
+        targetPoints = [];
+        const step = 6;
+        for (let y = minY; y <= maxY; y += step) {
+          for (let x = minX; x <= maxX; x += step) {
+            if (d2[(y * SAMPLE_RES + x) * 4 + 3] > 90) {
+              targetPoints.push({ u: (x - minX) / bwSrc, v: (y - minY) / bhSrc });
+            }
+          }
+        }
+        return;
+      }
+
+      const bwSrc = maxX - minX;
+      const bhSrc = maxY - minY;
+      buffaloAspect = bwSrc / bhSrc;
+
+      targetPoints = [];
+      const step = 6;
+      for (let y = minY; y <= maxY; y += step) {
+        for (let x = minX; x <= maxX; x += step) {
+          if (data[(y * SAMPLE_RES + x) * 4 + 3] > 90) {
+            targetPoints.push({ u: (x - minX) / bwSrc, v: (y - minY) / bhSrc });
+          }
+        }
+      }
+    }
+
+    function buildParticles() {
+      bparticles = targetPoints.map((p) => ({
+        u: p.u, v: p.v,
+        startX: Math.random() * bW,
+        startY: Math.random() * bH,
+        x: 0, y: 0,
+        phase: Math.random() * Math.PI * 2,
+        delay: Math.random() * 700,
+        r: 0.7 + Math.random() * 0.5,
+      }));
+    }
+
+    function bResize() {
+      bDPR = Math.min(window.devicePixelRatio || 1, 2);
+      const cw = bcanvas.clientWidth;
+      const ch = bcanvas.clientHeight;
+      if (cw === 0 || ch === 0) return;
+      const oldW = bW, oldH = bH;
+      bW = cw; bH = ch;
+      bcanvas.width = bW * bDPR;
+      bcanvas.height = bH * bDPR;
+      bctx.setTransform(bDPR, 0, 0, bDPR, 0, 0);
+      if (bparticles.length === 0) {
+        buildParticles();
+      } else if (oldW > 0 && oldH > 0) {
+        for (const p of bparticles) {
+          p.startX = (p.startX / oldW) * bW;
+          p.startY = (p.startY / oldH) * bH;
+        }
+      }
+    }
+
+    function btick(now) {
+      if (!visible) {
+        braf = requestAnimationFrame(btick);
+        return;
+      }
+      if (startTime === 0) startTime = now;
+      const elapsed = now - startTime;
+
+      bctx.clearRect(0, 0, bW, bH);
+
+      const cs = getComputedStyle(root);
+      const fc = (cs.getPropertyValue("--buffalo-rgb").trim()
+               || cs.getPropertyValue("--field-rgb").trim()
+               || "244, 243, 239");
+
+      const padding = 0.06;
+      const availW = bW * (1 - 2 * padding);
+      const availH = bH * (1 - 2 * padding);
+
+      let drawW, drawH;
+      if (availW / availH > buffaloAspect) {
+        drawH = availH;
+        drawW = drawH * buffaloAspect;
+      } else {
+        drawW = availW;
+        drawH = drawW / buffaloAspect;
+      }
+      const offsetX = (bW - drawW) / 2;
+      const offsetY = (bH - drawH) / 2;
+
+      for (const p of bparticles) {
+        const t = Math.max(0, Math.min(1, (elapsed - p.delay) / 1800));
+        const ease = 1 - Math.pow(1 - t, 3);
+        const wobbleX = Math.sin(now * 0.0009 + p.phase) * 1.5;
+        const wobbleY = Math.cos(now * 0.0011 + p.phase * 1.3) * 1.5;
+        const tx = offsetX + p.u * drawW + wobbleX;
+        const ty = offsetY + p.v * drawH + wobbleY;
+        p.x = p.startX * (1 - ease) + tx * ease;
+        p.y = p.startY * (1 - ease) + ty * ease;
+      }
+
+      // Connections — short-range neighbors only, draws the buffalo as mesh
+      const CONN = 16;
+      const CONN2 = CONN * CONN;
+      bctx.lineWidth = 0.55;
+      for (let i = 0; i < bparticles.length; i++) {
+        const p = bparticles[i];
+        const ti = Math.max(0, Math.min(1, (elapsed - p.delay) / 1800));
+        const fi = 1 - Math.pow(1 - ti, 3);
+        if (fi < 0.35) continue;
+        for (let j = i + 1; j < bparticles.length; j++) {
+          const q = bparticles[j];
+          const tj = Math.max(0, Math.min(1, (elapsed - q.delay) / 1800));
+          const fj = 1 - Math.pow(1 - tj, 3);
+          if (fj < 0.35) continue;
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > CONN2 || d2 < 0.5) continue;
+          const a = (1 - Math.sqrt(d2) / CONN) * 0.22 * fi * fj;
+          bctx.strokeStyle = "rgba(" + fc + ", " + a + ")";
+          bctx.beginPath();
+          bctx.moveTo(p.x, p.y);
+          bctx.lineTo(q.x, q.y);
+          bctx.stroke();
+        }
+      }
+
+      // Particles
+      for (const p of bparticles) {
+        const t = Math.max(0, Math.min(1, (elapsed - p.delay) / 1800));
+        const fade = 1 - Math.pow(1 - t, 3);
+        const alpha = (0.45 + fade * 0.45);
+        bctx.fillStyle = "rgba(" + fc + ", " + alpha + ")";
+        bctx.beginPath();
+        bctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        bctx.fill();
+      }
+
+      braf = requestAnimationFrame(btick);
+    }
+
+    buildTargets();
+    bResize();
+
+    const section = bcanvas.closest(".reveal");
+    if (section) {
+      const obs = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            visible = true;
+            startTime = 0;
+            obs.unobserve(e.target);
+          }
+        }
+      }, { threshold: 0.15 });
+      obs.observe(section);
+    } else {
+      visible = true;
+    }
+
+    let bResizeTO;
+    window.addEventListener("resize", () => {
+      clearTimeout(bResizeTO);
+      bResizeTO = setTimeout(bResize, 140);
+    });
+
+    braf = requestAnimationFrame(btick);
+  }
 })();
