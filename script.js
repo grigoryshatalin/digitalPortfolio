@@ -240,16 +240,40 @@
   new MutationObserver(refreshTheme).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
   function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W   = window.innerWidth;
-    H   = window.innerHeight;
+    const newDPR = Math.min(window.devicePixelRatio || 1, 2);
+    const newW = window.innerWidth;
+    const newH = window.innerHeight;
+
+    // No-op: mobile scroll fires resize even when dimensions are unchanged
+    // (e.g. visualViewport jitter). Skip to avoid clearing the canvas backing
+    // store and causing a one-frame blink.
+    if (particles.length > 0 && newW === W && newH === H && newDPR === DPR) return;
+
+    const oldW = W, oldH = H;
+    DPR = newDPR;
+    W = newW;
+    H = newH;
     canvas.width  = W * DPR;
     canvas.height = H * DPR;
     canvas.style.width  = W + "px";
     canvas.style.height = H + "px";
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     refreshTheme();
-    initParticles();
+
+    // First-time setup: build particles. After that, mobile scroll fires
+    // resize as the address bar toggles — rescale existing particles to
+    // the new viewport instead of wiping them (which would replay the
+    // 0–2.4s `bornAt` fade-in and cause visible blink-outs).
+    if (particles.length === 0) {
+      initParticles();
+    } else if (oldW > 0 && oldH > 0) {
+      const rx = W / oldW;
+      const ry = H / oldH;
+      for (const p of particles) {
+        p.x *= rx;
+        p.y *= ry;
+      }
+    }
   }
 
   function initParticles() {

@@ -81,6 +81,11 @@ body::before {
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  /* Promote to its own compositing layer — keeps iOS Safari from
+     dropping the fixed canvas mid-scroll when the URL bar toggles. */
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* ================================================================
