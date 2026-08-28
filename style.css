@@ -19,6 +19,8 @@
   --line:      rgba(13, 14, 16, 0.10);
   --line-hi:   rgba(13, 14, 16, 0.22);
   --accent:    #d44a17;
+  --gain:      #1a7f37;
+  --loss:      #c1361c;
   --field-rgb:   138, 144, 156;
   --buffalo-rgb: 30, 32, 38;
 }
@@ -32,6 +34,8 @@
   --line:      rgba(244, 243, 239, 0.08);
   --line-hi:   rgba(244, 243, 239, 0.22);
   --accent:    #ff9b5a;
+  --gain:      #3fb950;
+  --loss:      #f85149;
   --field-rgb:   244, 243, 239;
   --buffalo-rgb: 244, 243, 239;
 }
@@ -128,6 +132,12 @@ main {
 [data-decode].is-decoding {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
   letter-spacing: 0 !important;
+  color: var(--accent);
+  transition: color 0s;
+}
+/* Hover glitch: keep the element's own font + spacing so it lands on the
+   final text with no last-frame snap (only the accent color flips). */
+[data-decode].is-glitching {
   color: var(--accent);
   transition: color 0s;
 }
@@ -433,6 +443,111 @@ header { display: flex; flex-direction: column; gap: 56px; }
 .row:hover .row-arrow svg { transform: translate(2px, -2px); }
 
 /* ================================================================
+   Agent leaderboard — live P&L fetched from the modeltraining repo.
+   Hidden via [hidden] until initLeaderboard() finds published data;
+   the reveal animation plays the moment it un-hides.
+================================================================ */
+.leaderboard {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* `display:flex` above would otherwise defeat the [hidden] attribute. */
+.leaderboard[hidden] { display: none; }
+
+.lb-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.lb-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--soft);
+  font-weight: 500;
+}
+
+.lb-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gain);
+  animation: glyph-breathe 4s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
+
+.lb-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--mute);
+  letter-spacing: 0.04em;
+}
+
+.lb-mode {
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.lb-mode.is-live { color: var(--accent); }
+
+.lb-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.lb-row {
+  display: grid;
+  grid-template-columns: 2.5ch minmax(0, 1fr) auto 7ch;
+  gap: 14px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+.lb-row:first-child { border-top: none; }
+
+.lb-rank { color: var(--mute); }
+
+.lb-name {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-trades { color: var(--mute); }
+
+.lb-pnl { text-align: right; letter-spacing: -0.01em; }
+.lb-pct { text-align: right; color: var(--mute); }
+
+.lb-pnl.is-gain, .lb-pct.is-gain { color: var(--gain); }
+.lb-pnl.is-loss, .lb-pct.is-loss { color: var(--loss); }
+
+.lb-source {
+  align-self: flex-start;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+  text-decoration: none;
+  transition: color 0.4s ease;
+}
+.lb-source:hover { color: var(--accent); }
+
+/* ================================================================
    Entries (Education, Experience)
 ================================================================ */
 .entries {
@@ -685,6 +800,8 @@ footer { padding-top: 16px; }
   .entry-head { flex-direction: column; gap: 8px; }
   .entry-meta { align-items: flex-start; flex-direction: row; gap: 12px; flex-wrap: wrap; }
   .buffalo-stage { max-width: 320px; margin-bottom: 28px; }
+  .lb-row { grid-template-columns: 2ch minmax(0, 1fr) auto 6ch; gap: 10px; font-size: 0.78rem; }
+  .lb-trades { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

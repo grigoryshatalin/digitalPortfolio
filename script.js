@@ -45,7 +45,7 @@
     });
   }
 
-  function decodeInto(el, finalText, durPerChar = 38) {
+  function decodeInto(el, finalText, durPerChar = 38, glitchClass = "is-decoding") {
     const len = finalText.length;
     if (len === 0) return;
     if (el.dataset.glitching === "1") return; // prevent overlapping animations
@@ -53,7 +53,7 @@
 
     const start = performance.now();
     const totalDur = len * durPerChar + 180;
-    el.classList.add("is-decoding");
+    el.classList.add(glitchClass);
 
     function step(now) {
       const elapsed = now - start;
@@ -72,18 +72,19 @@
         requestAnimationFrame(step);
       } else {
         el.textContent = finalText;
-        el.classList.remove("is-decoding");
+        el.classList.remove(glitchClass);
         el.dataset.glitching = "0";
       }
     }
     requestAnimationFrame(step);
   }
 
-  // Faster, snappier glitch used on hover.
+  // Faster, snappier glitch used on hover. Uses the "is-glitching" class so the
+  // element keeps its own font/spacing and lands smoothly (no mono→Inter snap).
   function glitchHover(el) {
     const text = el.dataset.original;
     if (!text) return;
-    decodeInto(el, text, 16);
+    decodeInto(el, text, 16, "is-glitching");
   }
 
   function setupHoverGlitch() {
@@ -104,6 +105,103 @@
       const speed = text.length > 30 ? 22 : (text.length > 12 ? 32 : 50);
       setTimeout(() => decodeInto(t, text, speed), baseDelay + i * 75);
     });
+  }
+
+  /* ================================================================
+     Agent leaderboard — pulls live P&L straight from the modeltraining
+     repo at runtime (no build step, so this repo never has to change
+     when the numbers move). Stays hidden + silent until that file
+     exists and carries at least one agent.
+
+     Expected leaderboard.json shape:
+       {
+         "updated":  "2026-08-11T21:30:00Z",   // ISO 8601
+         "currency": "USD",                     // optional, default USD
+         "mode":     "paper" | "live",          // optional badge
+         "agents": [
+           { "name": "claude-opus", "pnl": 1234.56, "pnlPct": 12.3, "trades": 42 },
+           { "name": "gpt-4o",      "pnl": -210.10, "pnlPct": -2.1, "trades": 38 }
+         ]
+       }
+  ================================================================ */
+  const LEADERBOARD_URL =
+    "https://raw.githubusercontent.com/grigoryshatalin/modeltraining/main/leaderboard.json";
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function relTime(date) {
+    const s = Math.round((Date.now() - date.getTime()) / 1000);
+    if (s < 60)     return "just now";
+    const m = Math.round(s / 60);
+    if (m < 60)     return m + "m ago";
+    const h = Math.round(m / 60);
+    if (h < 24)     return h + "h ago";
+    return Math.round(h / 24) + "d ago";
+  }
+
+  async function initLeaderboard() {
+    const panel = document.getElementById("leaderboard");
+    if (!panel) return;
+
+    let data;
+    try {
+      const res = await fetch(LEADERBOARD_URL, { cache: "no-store" });
+      if (!res.ok) return;              // 404 until modeltraining publishes — stay hidden
+      data = await res.json();
+    } catch (_) {
+      return;                           // offline / CORS / parse error — stay hidden
+    }
+
+    const agents = (data && Array.isArray(data.agents) ? data.agents : [])
+      .filter((a) => a && typeof a.name === "string");
+    if (agents.length === 0) return;
+
+    // Defensive sort: rank best-to-worst even if the publisher didn't order.
+    agents.sort((a, b) => (Number(b.pnl) || 0) - (Number(a.pnl) || 0));
+
+    const currency = (data && data.currency) || "USD";
+    let money;
+    try {
+      money = new Intl.NumberFormat(undefined, { style: "currency", currency, signDisplay: "always" });
+    } catch (_) {
+      money = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", signDisplay: "always" });
+    }
+
+    const list = document.getElementById("lbList");
+    list.innerHTML = "";
+    agents.forEach((a, i) => {
+      const pnl = Number(a.pnl) || 0;
+      const cls = pnl > 0 ? "is-gain" : (pnl < 0 ? "is-loss" : "");
+      const pct = (a.pnlPct != null && isFinite(Number(a.pnlPct))) ? Number(a.pnlPct) : null;
+      const pctStr = pct != null ? (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%" : "";
+      const trades = (a.trades != null) ? ` <span class="lb-trades">· ${escapeHTML(a.trades)} trades</span>` : "";
+
+      const li = document.createElement("li");
+      li.className = "lb-row";
+      li.innerHTML =
+        `<span class="lb-rank">${i + 1}</span>` +
+        `<span class="lb-name">${escapeHTML(a.name)}${trades}</span>` +
+        `<span class="lb-pnl ${cls}">${money.format(pnl)}</span>` +
+        `<span class="lb-pct ${cls}">${pctStr}</span>`;
+      list.appendChild(li);
+    });
+
+    const modeEl = document.getElementById("lbMode");
+    if (modeEl && data.mode) {
+      modeEl.textContent = String(data.mode);
+      modeEl.classList.toggle("is-live", String(data.mode).toLowerCase() === "live");
+    }
+
+    const upEl = document.getElementById("lbUpdated");
+    if (upEl && data.updated) {
+      const t = new Date(data.updated);
+      if (!isNaN(t.getTime())) upEl.textContent = "updated " + relTime(t);
+    }
+
+    panel.hidden = false;               // un-hiding triggers the reveal animation
   }
 
   /* ================================================================
@@ -145,6 +243,7 @@
     // Pre-blank decode targets immediately so they don't flash real text
     prepDecodeTargets();
     setupHoverGlitch();
+    initLeaderboard();   // fire-and-forget; only renders if data is published
 
     if (reduceMotion) {
       document.querySelectorAll(".boot-line, .display-line").forEach((el) => {

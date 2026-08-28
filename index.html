@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grigory Shatalin — Software Engineer</title>
-  <meta name="description" content="Software engineer joining Circle's payments team. Researching multimodal AI at NSF iSAT, studying CS at CU Boulder." />
+  <meta name="description" content="Software engineer interning at the AWS database infrastructure team at Amazon. Researching multimodal AI at NSF iSAT, studying CS at CU Boulder." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -38,7 +38,7 @@
       </h1>
 
       <p class="lede">
-        Software engineer joining <a href="https://www.circle.com" class="link" data-decode target="_blank" rel="noopener noreferrer">Circle</a>'s payments team in late May. Currently researching multimodal AI at the <a href="https://www.colorado.edu/research/ai-institute/" class="link" data-decode target="_blank" rel="noopener noreferrer">NSF iSAT</a> institute and studying CS at CU Boulder.
+        Software engineer currently interning at <a href="https://aws.amazon.com" class="link" data-decode target="_blank" rel="noopener noreferrer">AWS</a> on the database infrastructure team. Previously at <a href="https://www.circle.com" class="link" data-decode target="_blank" rel="noopener noreferrer">Circle</a>, and studying CS at CU Boulder.
       </p>
 
       <ul class="top-links">
@@ -60,12 +60,29 @@
         <li class="entry">
           <div class="entry-head">
             <div class="entry-title-block">
+              <h3 class="entry-title" data-decode>Software Engineering Intern</h3>
+              <p class="entry-org">Circle</p>
+            </div>
+            <div class="entry-meta">
+              <span class="entry-loc">Remote</span>
+              <span class="entry-date">May 2026 — Present</span>
+            </div>
+          </div>
+          <ul class="entry-bullets">
+            <li>Built and shipped @circle-fin/cpn, a typed TypeScript SDK for cross-border settlement on the Circle Payments Network, turning integration errors into compile-time guarantees.</li>
+            <li>Designed structured error handling with exponential-backoff retries against CPN's REST APIs, making cross-border settlement flows fault-tolerant and resilient by default.</li>
+            <li>Abstracted travel-rule compliance, Permit2 approvals, and JWE encryption behind typed helpers; authored an MCP server surfacing integration constraints and Solana signing requirements at development time.</li>
+          </ul>
+        </li>
+        <li class="entry">
+          <div class="entry-head">
+            <div class="entry-title-block">
               <h3 class="entry-title" data-decode>Undergraduate Research Intern</h3>
               <p class="entry-org">NSF AI Institute for Student-AI Teaming (iSAT)</p>
             </div>
             <div class="entry-meta">
               <span class="entry-loc">Boulder, CO</span>
-              <span class="entry-date">2025 — Present</span>
+              <span class="entry-date">2025 — 2026</span>
             </div>
           </div>
           <ul class="entry-bullets">
@@ -133,7 +150,69 @@
 
     <section class="reveal">
       <div class="section-head">
-        <span class="kicker" data-decode>Selected Projects</span>
+        <span class="kicker" data-decode>Building Now</span>
+        <span class="kicker-rule" aria-hidden="true"></span>
+      </div>
+      <ol class="work">
+
+        <li>
+          <a class="row" href="https://github.com/grigoryshatalin/ironmanapp" target="_blank" rel="noopener noreferrer">
+            <span class="row-num" data-decode>001</span>
+            <span class="row-body">
+              <span class="row-title" data-decode>Endurance</span>
+              <span class="row-desc">Native SwiftUI iPhone app that maps a 36-week full-distance triathlon plan onto real calendar dates — fully offline, on-device, with a Foundation-only core under 60+ tests.</span>
+            </span>
+            <span class="row-meta">
+              <span class="row-arrow" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </span>
+            </span>
+          </a>
+        </li>
+
+        <li>
+          <a class="row" href="https://github.com/grigoryshatalin/modeltraining" target="_blank" rel="noopener noreferrer">
+            <span class="row-num" data-decode>002</span>
+            <span class="row-body">
+              <span class="row-title" data-decode>modeltraining</span>
+              <span class="row-desc">AI-driven trading bot on Alpaca — an LLM proposes buy / sell / hold per symbol, then a deterministic risk layer sizes and gates every order. Trades live with real money — not paper trading or a dry-run.</span>
+            </span>
+            <span class="row-meta">
+              <span class="row-arrow" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </span>
+            </span>
+          </a>
+        </li>
+
+      </ol>
+
+      <!-- Live agent P&L — dormant until modeltraining publishes leaderboard.json.
+           Populated client-side at runtime by initLeaderboard() in script.js;
+           requires no change to this repo when the numbers update. -->
+      <div class="leaderboard" id="leaderboard" hidden aria-live="polite">
+        <div class="lb-head">
+          <span class="lb-title">
+            <span class="lb-dot" aria-hidden="true"></span>
+            Agent P&amp;L
+          </span>
+          <span class="lb-meta">
+            <span class="lb-mode" id="lbMode"></span>
+            <span class="lb-updated" id="lbUpdated"></span>
+          </span>
+        </div>
+        <ol class="lb-list" id="lbList"></ol>
+        <a class="lb-source" href="https://github.com/grigoryshatalin/modeltraining" target="_blank" rel="noopener noreferrer">// live from modeltraining</a>
+      </div>
+    </section>
+
+    <section class="reveal">
+      <div class="section-head">
+        <span class="kicker" data-decode>Featured Work</span>
         <span class="kicker-rule" aria-hidden="true"></span>
       </div>
       <ol class="work">
@@ -161,23 +240,6 @@
             <span class="row-body">
               <span class="row-title" data-decode>Circle × Solana Payments</span>
               <span class="row-desc">MBC 2025 finalist — top 5 of 200+ submissions. Non-custodial USDC-to-fiat: a Chrome extension mints a just-in-time virtual Mastercard from an on-chain transfer at checkout.</span>
-            </span>
-            <span class="row-meta">
-              <span class="row-arrow" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-                </svg>
-              </span>
-            </span>
-          </a>
-        </li>
-
-        <li>
-          <a class="row" href="https://github.com/grigoryshatalin/KalshiNFL" target="_blank" rel="noopener noreferrer">
-            <span class="row-num" data-decode>003</span>
-            <span class="row-body">
-              <span class="row-title" data-decode>KalshiNFL</span>
-              <span class="row-desc">Tooling for tracking NFL game odds via Kalshi's prediction markets API.</span>
             </span>
             <span class="row-meta">
               <span class="row-arrow" aria-hidden="true">
