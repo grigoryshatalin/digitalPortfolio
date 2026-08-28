@@ -508,7 +508,7 @@ header { display: flex; flex-direction: column; gap: 56px; }
 
 .lb-row {
   display: grid;
-  grid-template-columns: 2.5ch minmax(0, 1fr) auto 7ch;
+  grid-template-columns: 2.5ch minmax(0, 1fr) 7ch;
   gap: 14px;
   align-items: baseline;
   padding: 9px 0;
@@ -530,11 +530,15 @@ header { display: flex; flex-direction: column; gap: 56px; }
 
 .lb-trades { color: var(--mute); }
 
-.lb-pnl { text-align: right; letter-spacing: -0.01em; }
-.lb-pct { text-align: right; color: var(--mute); }
+.lb-pct { text-align: right; color: var(--mute); letter-spacing: -0.01em; }
 
-.lb-pnl.is-gain, .lb-pct.is-gain { color: var(--gain); }
-.lb-pnl.is-loss, .lb-pct.is-loss { color: var(--loss); }
+.lb-pct.is-gain { color: var(--gain); }
+.lb-pct.is-loss { color: var(--loss); }
+
+/* Benchmark reference row (e.g. S&P 500 YTD) — set apart from the ranked agents. */
+.lb-row.is-benchmark { border-top-style: dashed; }
+.lb-row.is-benchmark .lb-rank { color: var(--line); }
+.lb-row.is-benchmark .lb-name { color: var(--soft); }
 
 .lb-source {
   align-self: flex-start;

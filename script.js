@@ -113,16 +113,18 @@
      when the numbers move). Stays hidden + silent until that file
      exists and carries at least one agent.
 
-     Expected leaderboard.json shape:
+     Consumed leaderboard.json shape (fields we actually read):
        {
-         "updated":  "2026-08-11T21:30:00Z",   // ISO 8601
-         "currency": "USD",                     // optional, default USD
-         "mode":     "paper" | "live",          // optional badge
+         "updated_at": "2026-08-11T21:30:00Z",  // or "updated"; ISO 8601
+         "mode":       "paper" | "live",         // optional badge
+         "benchmark":  { "name": "S&P 500", "return_pct": 15.2 },  // optional YTD reference
          "agents": [
-           { "name": "claude-opus", "pnl": 1234.56, "pnlPct": 12.3, "trades": 42 },
-           { "name": "gpt-4o",      "pnl": -210.10, "pnlPct": -2.1, "trades": 38 }
+           { "name": "opus48-macro", "return_pct": 12.3, "trades": 42 }
          ]
        }
+     Percentage return is the ranked metric — read from return_pct (falling back
+     to net_return_pct, then pnlPct). Legacy "pnl" / "currency" money fields are
+     ignored. The benchmark row renders only when the publisher includes it.
   ================================================================ */
   const LEADERBOARD_URL =
     "https://raw.githubusercontent.com/grigoryshatalin/modeltraining/main/leaderboard.json";
@@ -142,6 +144,20 @@
     return Math.round(h / 24) + "d ago";
   }
 
+  // Percentage return off an agent / benchmark record, or `fallback` when
+  // it's missing or non-numeric. Accepts the modeltraining field names
+  // (return_pct / net_return_pct) as well as the documented pnlPct.
+  function pctOf(obj, fallback = 0) {
+    if (!obj) return fallback;
+    const v = obj.return_pct != null ? obj.return_pct
+            : obj.net_return_pct != null ? obj.net_return_pct
+            : obj.pnlPct;
+    return (v != null && isFinite(Number(v))) ? Number(v) : fallback;
+  }
+
+  const fmtPct = (v) => (v >= 0 ? "+" : "") + v.toFixed(1) + "%";
+  const gainLoss = (v) => (v > 0 ? "is-gain" : (v < 0 ? "is-loss" : ""));
+
   async function initLeaderboard() {
     const panel = document.getElementById("leaderboard");
     if (!panel) return;
@@ -159,24 +175,16 @@
       .filter((a) => a && typeof a.name === "string");
     if (agents.length === 0) return;
 
-    // Defensive sort: rank best-to-worst even if the publisher didn't order.
-    agents.sort((a, b) => (Number(b.pnl) || 0) - (Number(a.pnl) || 0));
-
-    const currency = (data && data.currency) || "USD";
-    let money;
-    try {
-      money = new Intl.NumberFormat(undefined, { style: "currency", currency, signDisplay: "always" });
-    } catch (_) {
-      money = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", signDisplay: "always" });
-    }
+    // Percentage return is the ranked metric — sort best-to-worst even if the
+    // publisher didn't order; records missing a percentage sink to the bottom.
+    agents.sort((a, b) => pctOf(b, -Infinity) - pctOf(a, -Infinity));
 
     const list = document.getElementById("lbList");
     list.innerHTML = "";
     agents.forEach((a, i) => {
-      const pnl = Number(a.pnl) || 0;
-      const cls = pnl > 0 ? "is-gain" : (pnl < 0 ? "is-loss" : "");
-      const pct = (a.pnlPct != null && isFinite(Number(a.pnlPct))) ? Number(a.pnlPct) : null;
-      const pctStr = pct != null ? (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%" : "";
+      const pct = pctOf(a, null);
+      const cls = pct == null ? "" : gainLoss(pct);
+      const pctStr = pct != null ? fmtPct(pct) : "—";
       const trades = (a.trades != null) ? ` <span class="lb-trades">· ${escapeHTML(a.trades)} trades</span>` : "";
 
       const li = document.createElement("li");
@@ -184,10 +192,24 @@
       li.innerHTML =
         `<span class="lb-rank">${i + 1}</span>` +
         `<span class="lb-name">${escapeHTML(a.name)}${trades}</span>` +
-        `<span class="lb-pnl ${cls}">${money.format(pnl)}</span>` +
         `<span class="lb-pct ${cls}">${pctStr}</span>`;
       list.appendChild(li);
     });
+
+    // Benchmark reference (e.g. S&P 500 YTD) — appended after the agents, not
+    // ranked among them, so every return can be read against the market.
+    const bench = data && data.benchmark;
+    const benchPct = pctOf(bench, null);
+    if (benchPct != null) {
+      const benchName = (bench && bench.name) ? String(bench.name) : "S&P 500";
+      const li = document.createElement("li");
+      li.className = "lb-row is-benchmark";
+      li.innerHTML =
+        `<span class="lb-rank" aria-hidden="true">·</span>` +
+        `<span class="lb-name">${escapeHTML(benchName)} <span class="lb-trades">· YTD reference</span></span>` +
+        `<span class="lb-pct ${gainLoss(benchPct)}">${fmtPct(benchPct)}</span>`;
+      list.appendChild(li);
+    }
 
     const modeEl = document.getElementById("lbMode");
     if (modeEl && data.mode) {
@@ -196,8 +218,9 @@
     }
 
     const upEl = document.getElementById("lbUpdated");
-    if (upEl && data.updated) {
-      const t = new Date(data.updated);
+    const updated = data.updated || data.updated_at;
+    if (upEl && updated) {
+      const t = new Date(updated);
       if (!isNaN(t.getTime())) upEl.textContent = "updated " + relTime(t);
     }
 
