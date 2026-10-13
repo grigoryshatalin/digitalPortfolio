@@ -1,18 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grigory Shatalin — Software Engineer</title>
-  <meta name="description" content="Software engineer interning on the AWS Boost Spaces team at Amazon. Researching multimodal AI at NSF iSAT, studying CS at CU Boulder." />
-  <!-- Ten different sites, one person: send each visit to a random world. -->
-  <script src="shared/kit.js"></script>
-  <script>Kit.goRandom();</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Grigory &amp; Stephanie</title>
+<meta name="description" content="Our story, since January 2024." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fbf4ee; --ink: #2a1a1f; --mute: #8c7479; --rose: #e0567a; --rose2: #f39ab0; --wine: #7a1f3d; --gold: #e3b45c;
+  --serif: "Fraunces", Georgia, serif; --sans: "Inter", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); scroll-behavior: smooth; }
+body { margin: 0; color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  background: radial-gradient(ellipse 120% 60% at 50% 0%, #fde3e6 0%, var(--bg) 60%); }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+main { position: relative; z-index: 2; }
+
+/* ---------- Hero ---------- */
+.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 40px 20px; position: relative; }
+.hero svg.heart { width: min(150px, 34vw); height: auto; overflow: visible; }
+.heart path { fill: none; stroke: var(--rose); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 2.4s cubic-bezier(.6,0,.2,1) .3s forwards, beat 1.6s ease-in-out 2.8s infinite; transform-origin: 50% 55%; }
+.heart path.fill { fill: var(--rose); stroke: none; opacity: 0; animation: fillin 1s ease 2.2s forwards, beat 1.6s ease-in-out 2.8s infinite; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fillin { to { opacity: .14; } }
+@keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.08); } 30% { transform: scale(.98); } 45% { transform: scale(1.05); } }
+.hero h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, 10vw, 128px); line-height: .95; margin: 24px 0 0; letter-spacing: -.02em; }
+.hero h1 em { font-style: italic; color: var(--rose); font-weight: 300; }
+.hero h1 span { display: inline-block; opacity: 0; transform: translateY(30px); animation: up 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
+.hero h1 span:nth-child(2) { animation-delay: .25s; } .hero h1 span:nth-child(3) { animation-delay: .5s; }
+@keyframes up { to { opacity: 1; transform: none; } }
+.since { font-family: var(--serif); font-style: italic; font-size: clamp(18px, 2.2vw, 24px); color: var(--mute); margin: 18px 0 0; opacity: 0; animation: up 1s ease 1.1s forwards; }
+.counter { display: flex; gap: clamp(14px, 3vw, 34px); justify-content: center; margin-top: 30px; opacity: 0; animation: up 1s ease 1.4s forwards; }
+.counter div { min-width: 64px; }
+.counter b { display: block; font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 4.4vw, 52px); font-variant-numeric: tabular-nums; color: var(--wine); }
+.counter small { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mute); }
+.scroll { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: 28px; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--mute); opacity: 0; animation: up 1s ease 2s forwards; }
+.scroll i { width: 1px; height: 40px; background: linear-gradient(var(--rose), transparent); animation: drip 2s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* ---------- Timeline ---------- */
+.timeline { position: relative; max-width: 1080px; margin: 0 auto; padding: 40px 20px 60px; }
+#line { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+#line .track { fill: none; stroke: rgba(224,86,122,.16); stroke-width: 2; stroke-dasharray: 2 8; stroke-linecap: round; }
+#line .glow { fill: none; stroke: url(#lg); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(224,86,122,.5)); }
+#line .head { fill: #fff; stroke: var(--rose); stroke-width: 3; filter: drop-shadow(0 0 10px rgba(224,86,122,.9)); }
+#line .node { fill: var(--bg); stroke: rgba(224,86,122,.35); stroke-width: 2; transition: fill .5s, stroke .5s, r .5s; }
+#line .node.on { fill: var(--rose); stroke: #fff; }
+#line .node.big.on { fill: var(--wine); }
+
+.year { position: relative; text-align: center; margin: 80px 0 40px; pointer-events: none; }
+.year b { font-family: var(--serif); font-weight: 300; font-size: clamp(90px, 18vw, 220px); line-height: .8; color: transparent; -webkit-text-stroke: 1.5px rgba(122,31,61,.28); display: inline-block; letter-spacing: -.03em; will-change: transform; }
+.year small { display: inline-block; padding: 2px 14px; background: var(--bg); border-radius: 99px; margin-top: 10px; font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--mute); }
+
+.ev { position: relative; display: grid; grid-template-columns: 1fr 120px 1fr; align-items: center; min-height: 190px; margin: 10px 0; }
+.ev .card { grid-column: 1; justify-self: end; text-align: right; }
+.ev.r .card { grid-column: 3; justify-self: start; text-align: left; }
+.ev .anchor { grid-column: 2; grid-row: 1; justify-self: center; width: 2px; height: 2px; }
+.card { position: relative; width: min(400px, 100%); padding: 24px 26px 22px; border-radius: 22px; background: rgba(255,255,255,.78); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 #fff inset, 0 24px 50px -24px rgba(122,31,61,.28), 0 2px 6px rgba(122,31,61,.05);
+  opacity: 0; transform: translateY(40px) scale(.96); filter: blur(8px); transition: opacity .9s ease, transform 1.1s cubic-bezier(.2,.8,.2,1), filter .9s ease; }
+.ev.in .card { opacity: 1; transform: none; filter: none; }
+.date { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--rose); margin: 0 0 8px; font-weight: 500; }
+.card h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 2.6vw, 32px); line-height: 1.1; margin: 0 0 8px; letter-spacing: -.01em; }
+.card p { margin: 0; color: #5c454b; font-size: 15.5px; line-height: 1.55; }
+.icon { width: 54px; height: 54px; margin: 0 0 12px auto; display: block; }
+.ev.r .icon { margin-left: 0; }
+.icon * { fill: none; stroke: var(--rose); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 160; stroke-dashoffset: 160; transition: stroke-dashoffset 1.6s cubic-bezier(.6,0,.2,1) .35s; }
+.ev.in .icon * { stroke-dashoffset: 0; }
+
+/* milestones */
+.ev.big .card { background: linear-gradient(140deg, #7a1f3d, #b83a5e); color: #fff; width: min(460px, 100%); }
+.ev.big .card p { color: #fde3e6; } .ev.big .date { color: #ffd2dc; }
+.ev.big .card h3 { font-size: clamp(30px, 3.4vw, 44px); font-style: italic; font-weight: 300; }
+.ev.big .icon * { stroke: #fff; }
+
+/* long-distance map */
+.map { width: 100%; height: auto; margin-top: 14px; overflow: visible; }
+.map .arc { fill: none; stroke: var(--rose2); stroke-width: 1.6; stroke-dasharray: 4 6; }
+.map circle { fill: var(--rose); }
+.map text { font-family: var(--sans); font-size: 11px; fill: var(--mute); letter-spacing: .08em; }
+.map .plane { fill: var(--wine); }
+/* subaru */
+.road { position: relative; height: 34px; margin-top: 14px; border-bottom: 2px dashed rgba(122,31,61,.2); overflow: hidden; }
+.road svg { position: absolute; bottom: -1px; left: -70px; width: 64px; height: 30px; }
+.ev.in .road svg { animation: drive 3.2s cubic-bezier(.5,0,.3,1) .6s forwards; }
+@keyframes drive { to { left: calc(100% - 70px); } }
+
+.end { min-height: 90vh; display: grid; place-items: center; text-align: center; padding: 60px 20px 120px; }
+.end h2 { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: clamp(42px, 8vw, 96px); margin: 18px 0 0; color: var(--wine); }
+.end p { font-family: var(--serif); font-size: 20px; color: var(--mute); margin: 14px 0 0; }
+
+@media (max-width: 760px) {
+  .counter { gap: 10px; } .counter div { min-width: 0; } .counter small { letter-spacing: .12em; font-size: 10px; }
+  .ev, .ev.r { grid-template-columns: 44px 1fr; min-height: 0; margin: 26px 0; }
+  .ev .card, .ev.r .card { grid-column: 2; justify-self: stretch; text-align: left; width: 100%; }
+  .ev .anchor { grid-column: 1; }
+  .icon { margin-left: 0; }
+  .year { margin: 50px 0 20px; text-align: left; padding-left: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; transition-delay: 0s !important; }
+}
+</style>
 </head>
 <body>
-  <noscript>
-    <p>This site picks one of ten interactive versions at random, which needs JavaScript.
-       <a href="classic/">View the original site instead.</a></p>
-  </noscript>
+<canvas id="fx" aria-hidden="true"></canvas>
+<main>
+  <header class="hero">
+    <div>
+      <svg class="heart" viewBox="0 0 100 92" aria-hidden="true"><path class="fill" d="M50 88C20 64 4 48 4 28 4 14 15 4 28 4c9 0 17 5 22 13C55 9 63 4 72 4c13 0 24 10 24 24 0 20-16 36-46 60z"/><path d="M50 88C20 64 4 48 4 28 4 14 15 4 28 4c9 0 17 5 22 13C55 9 63 4 72 4c13 0 24 10 24 24 0 20-16 36-46 60z"/></svg>
+      <h1><span>Grigory</span> <span><em>&amp;</em></span> <span>Stephanie</span></h1>
+      <p class="since">together since March 21, 2024</p>
+      <div class="counter" aria-label="Time together"><div><b id="cd">0</b><small>days</small></div><div><b id="ch">0</b><small>hours</small></div><div><b id="cm">0</b><small>minutes</small></div><div><b id="cs">0</b><small>seconds</small></div></div>
+    </div>
+    <a class="scroll" href="#story">Our story<i></i></a>
+  </header>
+
+  <section class="timeline" id="story" aria-label="Our timeline">
+    <svg id="line" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f39ab0"/><stop offset=".5" stop-color="#e0567a"/><stop offset="1" stop-color="#7a1f3d"/></linearGradient></defs></svg>
+    <ol id="events" style="list-style:none;margin:0;padding:0"></ol>
+  </section>
+
+  <footer class="end" id="end">
+    <div>
+      <svg class="heart" viewBox="0 0 100 92" aria-hidden="true" style="width:90px"><path d="M50 88C20 64 4 48 4 28 4 14 15 4 28 4c9 0 17 5 22 13C55 9 63 4 72 4c13 0 24 10 24 24 0 20-16 36-46 60z" style="animation:none;stroke-dashoffset:0"/></svg>
+      <h2>to be continued…</h2>
+      <p id="endcount"></p>
+    </div>
+  </footer>
+</main>
+
+<script>
+(function () {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s) => document.querySelector(s);
+
+  /* ---------------- Our story ---------------- */
+  const I = {
+    chat: '<path d="M8 12h30a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6H22l-9 7v-7H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z"/><path d="M14 25h18M14 31h11"/><path d="M46 20h4a4 4 0 0 1 4 4v12"/>',
+    ramen: '<path d="M6 28h44a22 22 0 0 1-44 0z"/><path d="M18 50h20"/><path d="M14 22c2-4-2-6 0-10M24 22c2-4-2-6 0-10M34 22c2-4-2-6 0-10"/><path d="M40 6l10 18M46 4l6 20"/>',
+    heart: '<path d="M27 46C13 35 5 28 5 18 5 11 10 6 17 6c4 0 8 2 10 6 2-4 6-6 10-6 7 0 12 5 12 12 0 10-8 17-22 28z"/>',
+    prom: '<path d="M27 6l4 8 9 1-6 6 2 9-9-4-9 4 2-9-6-6 9-1z"/><path d="M14 38h26M18 38l-4 12M36 38l4 12M27 30v8"/>',
+    plane: '<path d="M4 30l46-18-14 36-8-14z"/><path d="M28 34l22-22"/>',
+    pumpkin: '<path d="M27 14c-14 0-22 8-22 18s8 16 22 16 22-6 22-16-8-18-22-18z"/><path d="M27 14v34M17 16c-4 6-4 26 2 32M37 16c4 6 4 26-2 32"/><path d="M27 14c0-5 3-8 7-9"/>',
+    pie: '<path d="M4 30h46l-4 12H8z"/><path d="M6 30c4-12 14-18 21-18s17 6 21 18"/><path d="M16 22l4 4M27 18v6M38 22l-4 4"/>',
+    cake: '<path d="M8 30h38v18H8z"/><path d="M8 38c5 3 9 3 13 0s9-3 13 0 8 3 12 0"/><path d="M27 30v-8"/><path d="M27 12c-3 4-3 7 0 9 3-2 3-5 0-9z"/>',
+    blossom: '<circle cx="27" cy="26" r="4"/><path d="M27 22c-6-10 6-14 4-2M31 25c10-4 10 8 0 4M29 30c4 10-8 10-4 0M23 29c-10 2-8-10 0-5M24 23c-6-8 4-12 3-1"/><path d="M27 34v16M27 44c6-2 10-6 12-10"/>',
+    oregon: '<path d="M4 44l14-22 10 14 8-10 14 18z"/><circle cx="40" cy="14" r="5"/>',
+    car: '<path d="M6 36v-8l6-10h24l8 10h6v8z"/><circle cx="16" cy="38" r="5"/><circle cx="40" cy="38" r="5"/><path d="M14 18l-4 10M30 18v10"/>',
+    music: '<path d="M20 40V12l26-6v28"/><circle cx="14" cy="40" r="6"/><circle cx="40" cy="34" r="6"/>',
+    needle: '<path d="M27 4v10M14 18h26l-6 6H20z"/><path d="M22 24l-6 26M32 24l6 26M19 38h16"/>',
+    house: '<path d="M8 26L27 10l19 16"/><path d="M12 24v24h30V24"/><path d="M23 48V36h8v12"/>',
+    ghost: '<path d="M12 48V24a15 15 0 0 1 30 0v24l-5-4-5 4-5-4-5 4-5-4z"/><circle cx="21" cy="24" r="2"/><circle cx="33" cy="24" r="2"/>',
+    tree: '<path d="M27 4l12 16h-6l10 12h-8l10 12H9l10-12h-8l10-12h-6z"/><path d="M27 44v8"/>',
+    camera: '<path d="M6 18h10l4-6h14l4 6h10v28H6z"/><circle cx="27" cy="31" r="9"/>',
+    box: '<path d="M6 18l21-10 21 10v24L27 52 6 42z"/><path d="M6 18l21 10 21-10M27 28v24"/>',
+    lake: '<path d="M4 30c6-4 10-4 16 0s10 4 16 0 10-4 16 0M4 40c6-4 10-4 16 0s10 4 16 0 10-4 16 0"/><path d="M14 22l8-14 8 14"/>',
+    briefcase: '<path d="M6 18h42v28H6z"/><path d="M20 18v-6h14v6M6 30h42"/>',
+    palm: '<path d="M28 50c0-14 2-26-2-36"/><path d="M26 14c-8-6-16-4-20 2 8-2 14 0 20-2zM26 14c8-8 18-6 22 0-8-2-14 0-22 0zM26 14c-4-8-2-12 4-12-2 4-2 8-4 12z"/><path d="M6 50h42"/>',
+    alps: '<path d="M2 46l14-22 8 10 10-18 18 30z"/><path d="M16 24l3 5M34 16l4 7"/>',
+    grad: '<path d="M4 20l23-10 23 10-23 10z"/><path d="M14 25v12c6 5 20 5 26 0V25M48 21v14"/>',
+  };
+  const EV = [
+    { y: "2024", sub: "where it started" },
+    { d: "January 2024", t: "Hello", p: "We started talking.", i: "chat" },
+    { d: "January – March 2024", t: "Ramen Wednesdays", p: "Hanging out all the time. Silver Lake Ramen on Wednesdays became our thing.", i: "ramen" },
+    { d: "March 21, 2024", t: "Officially us", p: "The day we started dating.", i: "heart", big: true, fx: "hearts" },
+    { d: "May 2024", t: "Prom", p: "Our prom, together.", i: "prom", fx: "sparkle" },
+    { d: "August 2024", t: "Long distance begins", p: "Grigory leaves for CU Boulder.", i: "plane", map: true },
+    { d: "Halloween 2024", t: "Halloween in Oregon", p: "Grigory visits Steph at the University of Oregon.", i: "ghost" },
+    { d: "November 2024", t: "Thanksgiving", p: "Thanksgiving together.", i: "pie" },
+    { y: "2025", sub: "the long-distance year" },
+    { d: "March 21, 2025", t: "One year", p: "Our first anniversary.", i: "cake", big: true, fx: "confetti" },
+    { d: "March 29, 2025", t: "Cherry blossoms", p: "Taking pictures under the blossoms at the University of Washington.", i: "blossom", fx: "petals" },
+    { d: "May 17, 2025", t: "Oregon, again", p: "Grigory visits Steph in Oregon.", i: "oregon" },
+    { d: "June 17, 2025", t: "The Subaru", p: "Grigory buys a Subaru.", i: "car", car: true },
+    { d: "July 12, 2025", t: "The Weeknd", p: "Concert night, together.", i: "music", fx: "sparkle" },
+    { d: "July 29, 2025", t: "Space Needle & MoPOP", p: "A day out in Seattle.", i: "needle" },
+    { d: "August 2025", t: "Back to Boulder", p: "Grigory heads back to Boulder for another year.", i: "plane" },
+    { d: "September 11, 2025", t: "Steph visits", p: "Stephanie comes out to visit.", i: "heart", fx: "hearts" },
+    { d: "Halloween 2025", t: "Halloween, round two", p: "Grigory visits Steph.", i: "pumpkin" },
+    { d: "November 28 – 29, 2025", t: "Thanksgiving & Christmas", p: "Thanksgiving, then decorating for Christmas together.", i: "tree", fx: "snow" },
+    { y: "2026", sub: "closer and closer" },
+    { d: "April 4, 2026", t: "Grad photos", p: "Steph visits Boulder to take grad photos.", i: "camera" },
+    { d: "May 2, 2026", t: "Goodbye, Boulder", p: "Grigory moves out of Boulder.", i: "box" },
+    { d: "May 24, 2026", t: "Lake weekend", p: "Grigory visits Steph in Oregon for the lake.", i: "lake" },
+    { d: "May 26, 2026", t: "Circle", p: "Grigory's internship at Circle starts.", i: "briefcase" },
+    { d: "June 23, 2026", t: "Hawaii", p: "Grigory and Stephanie go to Hawaii.", i: "palm", big: true, fx: "sun" },
+    { d: "July 25, 2026", t: "Leavenworth", p: "A trip to Leavenworth.", i: "alps" },
+    { d: "September 8, 2026", t: "Amazon", p: "Grigory starts at Amazon.", i: "briefcase" },
+    { d: "September 30, 2026", t: "UW", p: "Stephanie starts at UW.", i: "grad", fx: "confetti" },
+  ];
+
+  const list = $("#events");
+  let side = 0;
+  list.innerHTML = EV.map((v) => {
+    if (v.y) return `<li class="year" data-year><b>${v.y}</b><small>${v.sub}</small></li>`;
+    const r = side++ % 2 ? " r" : "";
+    const extra = v.map
+      ? `<svg class="map" viewBox="0 0 300 80" aria-label="Boulder to Oregon"><path class="arc" id="arc" d="M30 60 Q150 -10 270 60"/><circle cx="30" cy="60" r="5"/><circle cx="270" cy="60" r="5"/><text x="30" y="78" text-anchor="middle">OREGON</text><text x="270" y="78" text-anchor="middle">BOULDER</text>
+         <path class="plane" d="M-7 -3 L7 0 L-7 3 L-4 0Z"><animateMotion class="fly" dur="2.4s" begin="indefinite" fill="freeze" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#arc"/></animateMotion></path></svg>`
+      : v.car ? `<div class="road" aria-hidden="true"><svg viewBox="0 0 64 30"><path d="M4 22v-6l6-8h28l8 8h12v6z" fill="#3c6e9e"/><path d="M14 10h10v6H11zM28 10h9l5 6H28z" fill="#cfe6ff"/><circle cx="16" cy="23" r="5" fill="#2a1a1f"/><circle cx="48" cy="23" r="5" fill="#2a1a1f"/></svg></div>` : "";
+    return `<li class="ev${r}${v.big ? " big" : ""}" data-fx="${v.fx || ""}">
+      <article class="card"><svg class="icon" viewBox="0 0 54 54" aria-hidden="true">${I[v.i]}</svg>
+        <p class="date">${v.d}</p><h3>${v.t}</h3><p>${v.p}</p>${extra}</article>
+      <span class="anchor"></span></li>`;
+  }).join("");
+
+  /* ---------------- Live counter ---------------- */
+  const START = new Date(2024, 2, 21);
+  function tick() {
+    const ms = Date.now() - START.getTime();
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, s = Math.floor(ms / 1e3) % 60;
+    $("#cd").textContent = d.toLocaleString(); $("#ch").textContent = h; $("#cm").textContent = m; $("#cs").textContent = s;
+    $("#endcount").textContent = `${d.toLocaleString()} days and counting.`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* ---------------- Reveal on scroll ---------------- */
+  const io = new IntersectionObserver((es) => es.forEach((en) => {
+    if (!en.isIntersecting) return;
+    en.target.classList.add("in"); io.unobserve(en.target);
+    const fly = en.target.querySelector(".fly"); if (fly && fly.beginElement) setTimeout(() => fly.beginElement(), 700);
+    if (en.target.dataset.fx) burst(en.target.dataset.fx, en.target.querySelector(".card"));
+  }), { threshold: 0.25 });
+  const evEls = [...document.querySelectorAll(".ev")];
+  evEls.forEach((el) => io.observe(el));
+
+  /* ---------------- The winding line ---------------- */
+  const svg = $("#line"), tl = $(".timeline");
+  let path, glow, head, nodes = [], samples = [], total = 0;
+  function build() {
+    const box = tl.getBoundingClientRect(), top = box.top + scrollY;
+    const narrow = innerWidth <= 760;
+    const pts = evEls.map((el, i) => {
+      const a = el.querySelector(".anchor").getBoundingClientRect();
+      return [a.left - box.left + (narrow ? 0 : (i % 2 ? 24 : -24)), a.top + scrollY - top];
+    });
+    const first = [pts[0][0], 0], last = [pts[pts.length - 1][0], tl.offsetHeight];
+    const all = [first, ...pts, last];
+    let d = `M${all[0][0]} ${all[0][1]}`;
+    for (let i = 1; i < all.length; i++) {
+      const [x0, y0] = all[i - 1], [x1, y1] = all[i], my = (y0 + y1) / 2;
+      d += ` C${x0} ${my} ${x1} ${my} ${x1} ${y1}`;
+    }
+    svg.setAttribute("viewBox", `0 0 ${tl.offsetWidth} ${tl.offsetHeight}`);
+    svg.innerHTML = svg.querySelector("defs").outerHTML +
+      `<path class="track" d="${d}"/><path class="glow" d="${d}"/>` +
+      pts.map((p, i) => `<circle class="node${evEls[i].classList.contains("big") ? " big" : ""}" cx="${p[0]}" cy="${p[1]}" r="${evEls[i].classList.contains("big") ? 9 : 6}"/>`).join("") +
+      `<circle class="head" r="7"/>`;
+    path = svg.querySelector(".glow"); head = svg.querySelector(".head"); nodes = [...svg.querySelectorAll(".node")];
+    total = path.getTotalLength();
+    path.style.strokeDasharray = total; path.style.strokeDashoffset = total;
+    samples = [];
+    for (let k = 0; k <= 600; k++) { const L = total * k / 600, p = path.getPointAtLength(L); samples.push([p.y, L, p.x]); }
+    nodeY = pts.map((p) => p[1]);
+    update();
+  }
+  let nodeY = [];
+  function lenAtY(y) {
+    if (y <= 0) return 0;
+    for (let k = 1; k < samples.length; k++) if (samples[k][0] >= y) {
+      const [y0, L0] = samples[k - 1], [y1, L1] = samples[k];
+      return L0 + (L1 - L0) * ((y - y0) / Math.max(1e-6, y1 - y0));
+    }
+    return total;
+  }
+  let curL = 0, targetL = 0;
+  function update() {
+    const box = tl.getBoundingClientRect();
+    const y = innerHeight * 0.62 - box.top;
+    targetL = Math.max(0, Math.min(total, lenAtY(y)));
+    nodes.forEach((n, i) => n.classList.toggle("on", nodeY[i] <= y));
+  }
+  addEventListener("scroll", update, { passive: true });
+
+  // parallax year numerals + smooth line drawing
+  const years = [...document.querySelectorAll("[data-year] b")];
+  function frame() {
+    curL += (targetL - curL) * (reduce ? 1 : 0.12);
+    if (path) {
+      path.style.strokeDashoffset = total - curL;
+      const p = path.getPointAtLength(curL); head.setAttribute("cx", p.x); head.setAttribute("cy", p.y);
+      head.style.opacity = curL > 2 && curL < total - 2 ? 1 : 0;
+    }
+    years.forEach((b) => { const r = b.getBoundingClientRect(); b.style.transform = `translateY(${((r.top + r.height / 2) - innerHeight / 2) * -0.12}px)`; });
+    drawFx();
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------------- Particles: ambient hearts + bursts ---------------- */
+  const cv = $("#fx"), c = cv.getContext("2d");
+  let W, H, parts = [];
+  function size() { const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  const R = (a, b) => a + Math.random() * (b - a);
+  function heartPath(x, y, s) {
+    c.beginPath(); c.moveTo(x, y + s * .3);
+    c.bezierCurveTo(x, y, x - s * .5, y, x - s * .5, y + s * .3);
+    c.bezierCurveTo(x - s * .5, y + s * .6, x, y + s * .8, x, y + s);
+    c.bezierCurveTo(x, y + s * .8, x + s * .5, y + s * .6, x + s * .5, y + s * .3);
+    c.bezierCurveTo(x + s * .5, y, x, y, x, y + s * .3); c.fill();
+  }
+  function spawn(kind, x, y, burstMode) {
+    const p = { kind, x, y, life: 0, max: R(160, 320), rot: R(0, 6), vr: R(-.04, .04), s: R(6, 14) };
+    if (kind === "hearts") { p.vx = burstMode ? R(-2.4, 2.4) : R(-.2, .2); p.vy = burstMode ? R(-4, -1.2) : R(-.6, -.25); p.col = ["#e0567a", "#f39ab0", "#b83a5e"][Math.random() * 3 | 0]; }
+    if (kind === "confetti") { p.vx = R(-3.5, 3.5); p.vy = R(-6, -2); p.col = ["#e0567a", "#e3b45c", "#7ab0e0", "#9ad0a0", "#f39ab0"][Math.random() * 5 | 0]; p.s = R(5, 9); }
+    if (kind === "petals") { p.vx = R(.3, 1.4); p.vy = R(.6, 1.6); p.col = ["#f8c6d2", "#f39ab0", "#fde3e6"][Math.random() * 3 | 0]; p.y = y ?? R(-40, -10); }
+    if (kind === "snow") { p.vx = R(-.3, .3); p.vy = R(.5, 1.3); p.col = "#c9d8ea"; p.s = R(2, 5); }
+    if (kind === "sparkle") { p.vx = R(-1.5, 1.5); p.vy = R(-2.5, .5); p.col = "#e3b45c"; p.s = R(4, 10); p.max = R(60, 120); }
+    if (kind === "sun") { p.vx = R(-.4, .4); p.vy = R(-.8, -.2); p.col = "#f2a34a"; p.s = R(3, 7); }
+    parts.push(p);
+  }
+  function burst(kind, card) {
+    if (reduce || !kind) return;
+    const r = card.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height * .3;
+    const n = { hearts: 26, confetti: 70, sparkle: 30, sun: 30, petals: 0, snow: 0 }[kind];
+    for (let i = 0; i < n; i++) spawn(kind, cx + R(-60, 60), cy + R(-20, 20), true);
+    if (kind === "petals" || kind === "snow") { weather = { kind, until: performance.now() + 7000 }; }
+  }
+  let weather = null;
+  function drawFx() {
+    if (reduce) return;
+    c.clearRect(0, 0, W, H);
+    if (Math.random() < .035) spawn("hearts", R(0, W), H + 20, false);
+    if (weather && performance.now() < weather.until && Math.random() < .5) spawn(weather.kind, R(-50, W), -20, false);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i]; p.life++;
+      if (p.kind === "confetti" || p.kind === "sparkle" || (p.kind === "hearts" && p.vy < -1)) p.vy += .08;
+      if (p.kind === "petals") p.vx += Math.sin(p.life * .05) * .03;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      const a = Math.max(0, Math.min(1, p.life / 20, (p.max - p.life) / 40));
+      if (a <= 0 && p.life > 20 || p.y > H + 60 || p.y < -80) { parts.splice(i, 1); continue; }
+      c.globalAlpha = a * (p.kind === "hearts" && Math.abs(p.vy) < 1 ? .45 : .9); c.fillStyle = p.col;
+      c.save(); c.translate(p.x, p.y); c.rotate(p.rot);
+      if (p.kind === "hearts") heartPath(0, -p.s / 2, p.s);
+      else if (p.kind === "confetti") c.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+      else if (p.kind === "petals") { c.beginPath(); c.ellipse(0, 0, p.s * .6, p.s * .35, 0, 0, 7); c.fill(); }
+      else if (p.kind === "sparkle") { const s = p.s * (0.6 + .4 * Math.sin(p.life * .3)); c.beginPath(); c.moveTo(0, -s); c.lineTo(s * .25, -s * .25); c.lineTo(s, 0); c.lineTo(s * .25, s * .25); c.lineTo(0, s); c.lineTo(-s * .25, s * .25); c.lineTo(-s, 0); c.lineTo(-s * .25, -s * .25); c.fill(); }
+      else { c.beginPath(); c.arc(0, 0, p.s / 2, 0, 7); c.fill(); }
+      c.restore();
+    }
+    c.globalAlpha = 1;
+  }
+
+  addEventListener("resize", () => { size(); build(); });
+  size();
+  const go = () => { build(); requestAnimationFrame(frame); };
+  document.fonts ? document.fonts.ready.then(go) : go();
+  setTimeout(build, 1200);
+})();
+</script>
 </body>
 </html>
