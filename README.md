@@ -1,37 +1,39 @@
 # Digital Portfolio
 
-Personal portfolio site for Grigory Shatalin — a single static page with a terminal-style boot sequence, decoding text, and an interactive particle field. Built with vanilla JavaScript, HTML5 canvas, and CSS. No frameworks, no build step, no analytics.
+Personal portfolio site for Grigory Shatalin — nine completely different interactive websites built around the same person. Every visit shows one of them, and each refresh moves on to the next. Vanilla HTML, CSS, JavaScript and canvas; no frameworks, no build step, no analytics.
 
-## Structure
+## The worlds
 
-- `index.html` — all content: header and links, Experience, Education, Building Now, Featured Work, Stack, Approach, Colophon
-- `style.css` — layout and type, dark/light themes via CSS variables, mobile breakpoint at 640px, reduced-motion overrides
-- `script.js` — all behavior (see below)
-- `Software_Engineer_Resume.pdf` — linked from the header
+| # | Folder | World | How you explore it |
+|---|--------|-------|--------------------|
+| 1 | `worlds/train` | **The Midnight Limited** — a particle train, one station per chapter | Next station / scroll / arrow keys; station line at the bottom |
+| 2 | `worlds/metro` | **Shatalin Metro** — a transit map of the career | Tap any station; lines for work, study and projects |
+| 3 | `worlds/blueprint` | **Drawing GS-26** — an engineering drawing with meshing gears | Guided tour (Next →), or pan and zoom freely |
+| 4 | `worlds/pixel` | **Shatalin Town** — a pixel RPG town with enterable buildings | Walk (or tap) into any door; talk to objects inside; Map lists every building |
+| 5 | `worlds/desktop` | **Grigory 98** — a retro desktop OS | Click icons or the taskbar buttons; draggable windows, Minesweeper |
+| 6 | `worlds/gazette` | **The Shatalin Gazette** — a broadsheet newspaper | Turn pages between sections; halftone illustrations |
+| 7 | `worlds/abyss` | **Descent** — a dive to the sea floor | Scroll to descend; depth gauge, flashlight in the dark |
+| 8 | `worlds/record` | **Selected Works LP** — a record on a turntable | Click a track to play it; optional ambient music |
+| 9 | `worlds/arcana` | **The Arcana** — a career reading in eight cards | Touch the deck, pick a card |
 
-## What `script.js` does
+The previous single-page site lives on at `classic/`.
 
-- **Theme toggle** — dark/light, saved to `localStorage`, defaults to the system preference
-- **Boot sequence** — types out the `> initializing...` lines and the name, then fades in the intro and top links
-- **Decode effect** — any element with `data-decode` scrambles and resolves when its `.reveal` section scrolls into view; links re-scramble on hover
-- **Particle field** — full-page canvas (`#field`) with flow-field drift, cursor pull, and connecting lines between nearby particles
-- **Buffalo** — in the Education section, particles assemble into a 🦬 silhouette sampled from the emoji (falls back to a "CU" monogram)
-- **Agent P&L leaderboard** — fetches `leaderboard.json` from [modeltraining](https://github.com/grigoryshatalin/modeltraining) at runtime and ranks agents by percentage return, with an optional S&P 500 YTD benchmark row. Stays hidden until that file exists, so this repo never needs to change when the numbers do.
+## How it fits together
 
-All animation is skipped when the visitor has `prefers-reduced-motion` enabled.
+- `shared/data.js` — **all the content** (experience, education, projects, skills, links). Edit it here once and every world updates.
+- `shared/kit.js` — the world list, the visit cycle, the small "switch world" button shown in every world, and helpers.
+- `index.html` — a tiny loader that sends each visit to the next world.
+- `worlds/<name>/index.html` — each world is one self-contained file.
 
-## Editing content
+### Which world you see
 
-Everything lives in `index.html`:
+Each browser gets its own random order of the worlds, stored in `localStorage` (`gs-world-cycle`). Visiting the root or refreshing a world advances one step, so nothing repeats until all of them have been seen, and then the order starts again from the first. Opening a world's URL directly (or `/?world=train`) shows that world without skipping ahead.
 
-- **Experience / Education** — each role is an `<li class="entry">` inside `<ol class="entries">`, with title, org, location, dates, and bullets
-- **Projects** — each project in Building Now / Featured Work is an `<a class="row">` with a number, title, and description
-- **Animated text** — add `data-decode` to an element to give it the decode effect
-- **Colophon** — update "Last revision" when making changes
+The switch button in each world (`01/9` etc.) lists them all, plus "Surprise me" and the original site.
 
 ## Running locally
 
-Open `index.html` in a browser, or serve the folder so the leaderboard fetch behaves as it does in production:
+Open `index.html` in a browser, or serve the folder:
 
 ```sh
 python3 -m http.server

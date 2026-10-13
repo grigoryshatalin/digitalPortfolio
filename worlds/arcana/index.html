@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-world="arcana" data-switcher="br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Arcana — Grigory Shatalin</title>
+<meta name="description" content="Grigory Shatalin, software engineer — a career reading in eight cards." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="../../shared/data.js"></script>
+<script src="../../shared/kit.js"></script>
+<style>
+@media (max-width: 759px) { :root { --cw: 78px !important; } .read .say { margin-bottom: 12px; } }
+:root { --gold: #e3c27a; --ink: #f3ead7; --serif: "Cormorant Garamond", Georgia, serif; --cinzel: "Cinzel", Georgia, serif; --cw: clamp(84px, 10vw, 150px); }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #04110d; color: var(--ink); font-family: var(--serif); }
+body { background: radial-gradient(ellipse 80% 70% at 50% 45%, #134236 0%, #0c2a23 55%, #04110d 100%); }
+.glow { position: fixed; left: 50%; top: 55%; width: 90vmax; height: 90vmax; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(255,200,120,.12), transparent 55%); animation: flicker 4s ease-in-out infinite; }
+@keyframes flicker { 50% { opacity: .7; transform: translate(-50%, -50%) scale(1.03); } }
+header { position: fixed; top: max(28px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center; z-index: 5; transition: opacity .5s; pointer-events: none; }
+header h1 { font-family: "Cinzel Decorative", serif; font-size: clamp(28px, 4.4vw, 54px); margin: 0; letter-spacing: .06em;
+  background: linear-gradient(180deg, #fbefc6, #d8b35e 55%, #a07a2c); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+header p { margin: 6px 0 0; font-style: italic; font-size: clamp(16px, 1.8vw, 20px); color: #d9cdb2; }
+body.reading header { opacity: 0; }
+.hint { position: fixed; left: 0; right: 0; bottom: max(36px, env(safe-area-inset-bottom)); text-align: center; z-index: 5; font-family: var(--cinzel); font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); transition: opacity .4s; pointer-events: none; }
+.hint span { display: inline-block; animation: breathe 2.4s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .45; } }
+body.reading .hint { opacity: 0; }
+
+.card { position: fixed; left: 0; top: 0; width: var(--cw); aspect-ratio: 200 / 340; border: 0; padding: 0; background: none; cursor: pointer; perspective: 1000px;
+  transition: transform .9s cubic-bezier(.2,.8,.2,1), opacity .5s, filter .5s; will-change: transform; }
+.card:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; border-radius: 10px; }
+.inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.5,0,.2,1) .15s; }
+.card.up .inner { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; border-radius: 10px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 14px 28px rgba(0,0,0,.55); }
+.face svg { width: 100%; height: 100%; display: block; }
+.front { transform: rotateY(180deg); }
+.card.lift { filter: brightness(1.12); }
+body.reading .card:not(.chosen) { opacity: .16; pointer-events: none; }
+
+.read { position: fixed; z-index: 6; opacity: 0; pointer-events: none; transition: opacity .5s .35s, transform .7s cubic-bezier(.2,.8,.2,1) .3s; transform: translateY(14px); }
+body.reading .read { opacity: 1; pointer-events: auto; transform: none; }
+.read .num { font-family: var(--cinzel); letter-spacing: .35em; font-size: 12px; color: var(--gold); margin: 0; }
+.read h2 { font-family: "Cinzel Decorative", serif; font-size: clamp(28px, 3.6vw, 46px); margin: 6px 0 10px; line-height: 1.05; }
+.read .who { font-size: clamp(20px, 2vw, 24px); margin: 0; }
+.read .when { font-family: var(--cinzel); font-size: 12px; letter-spacing: .16em; color: #b9ad94; margin: 6px 0 18px; text-transform: uppercase; }
+.read .say { font-size: clamp(19px, 1.8vw, 23px); line-height: 1.45; margin: 0 0 18px; font-style: italic; color: #efe6d2; }
+.read ul { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 8px; }
+.read li { font-size: 18px; line-height: 1.4; }
+.read li a, .read a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(227,194,122,.4); }
+.read li span { color: #b9ad94; font-style: italic; }
+.read .nav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.btn { font-family: var(--cinzel); font-weight: 600; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; cursor: pointer; padding: 11px 18px; border-radius: 99px; border: 0;
+  color: var(--gold); background: rgba(4,17,13,.6); box-shadow: 0 0 0 1px rgba(227,194,122,.5) inset; }
+.btn.solid { color: #1a1206; background: linear-gradient(180deg, #f6e2a7, #c99c45); box-shadow: none; }
+.btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .card, .inner, .read { transition: none; } .glow, .hint span { animation: none; } }
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+<header><h1>The Arcana</h1><p id="sub"></p></header>
+<div id="table"></div>
+<p class="hint" id="hint"><span>Touch the deck</span></p>
+<section class="read" id="read" aria-live="polite"></section>
+
+<script>
+(function () {
+  const P = window.PORTFOLIO, K = window.Kit, e = K.esc;
+  const $ = (s) => document.querySelector(s);
+  const reduce = K.reduceMotion;
+  const ext = 'target="_blank" rel="noopener noreferrer"';
+  $("#sub").textContent = `A career reading for ${P.name}`;
+  const X = Object.fromEntries(P.experience.map((x) => [x.id, x]));
+
+  /* ---------------- Eight cards, one idea each ---------------- */
+  const deck = [
+    { sym: "engineer", name: "The Engineer", who: P.name, when: P.role, say: P.intro,
+      list: P.principles.map((x) => e(x)) },
+    ...["aws", "circle", "isat", "akvelon"].filter((id) => X[id]).map((id) => {
+      const x = X[id];
+      return { sym: { aws: "tower", circle: "courier", isat: "eye", akvelon: "tools" }[id], name: { aws: "The Architect", circle: "The Courier", isat: "The Oracle", akvelon: "The Artisan" }[id],
+        who: x.org, when: `${x.role} · ${x.dates}`, say: x.summary, tags: x.tags };
+    }),
+    { sym: "buffalo", name: "The Buffalo", who: P.education[0].school, when: `${P.education[0].degree} · ${P.education[0].dates}`,
+      say: `GPA ${P.education[0].gpa}.` + (P.education[1] ? ` Before that, ${P.education[1].degree} at ${P.education[1].schoolShort} (GPA ${P.education[1].gpa}).` : "") },
+    { sym: "wheel", name: "Wheel of Fortune", who: "What's being built", when: "", say: "Four works in motion.",
+      list: P.projects.map((p) => `<a href="${e(p.url)}" ${ext}>${e(p.name)}</a> <span>— ${e(p.tagline)}</span>`) },
+    { sym: "letter", name: "The Messenger", who: "Send word", when: "", say: "The reading ends with a message.",
+      list: P.contacts.map((c) => `<a href="${e(c.href)}" ${c.id === "email" ? "" : ext}>${e(c.label)}</a> <span>— ${e(c.handle)}</span>`) },
+  ];
+  deck.forEach((c, i) => { c.section = i === 0 ? "About" : i < 5 ? "Experience" : i === 5 ? "Education" : i === 6 ? "Projects" : "Contact"; });
+  deck.forEach((c, i) => { c.n = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII"][i]; });
+
+  /* ---------------- Card art (SVG) ---------------- */
+  const G = `<defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbefc6"/><stop offset=".5" stop-color="#d4ac55"/><stop offset="1" stop-color="#8a6a24"/></linearGradient>
+    <radialGradient id="night" cx=".5" cy=".38" r=".8"><stop offset="0" stop-color="#26306a"/><stop offset=".7" stop-color="#141a3e"/><stop offset="1" stop-color="#0b0f26"/></radialGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fbefc6" stop-opacity=".35"/><stop offset="1" stop-color="#fbefc6" stop-opacity="0"/></radialGradient>
+  </defs>`;
+  const SYM = {
+    engineer: `<circle cx="100" cy="150" r="44"/>${Array.from({ length: 12 }, (_, i) => `<rect x="96" y="98" width="8" height="12" transform="rotate(${i * 30} 100 150)"/>`).join("")}<path d="M100 120l8 22 22 8-22 8-8 22-8-22-22-8 22-8z"/>`,
+    tower: `<path d="M78 214V122l22-18 22 18v92M84 134h32M84 154h32M84 174h32M84 194h32M100 104V86"/><path d="M88 84a16 16 0 0 1 24 0M80 76a28 28 0 0 1 40 0M72 68a40 40 0 0 1 56 0"/>`,
+    courier: `<circle cx="100" cy="150" r="46"/><path d="M54 150h92M100 104c-18 24-18 68 0 92M100 104c18 24 18 68 0 92"/><path d="M60 110c30-30 70-28 90 8"/><path d="M146 112l4 8-9-1"/>`,
+    eye: `<path d="M50 150c28-34 72-34 100 0-28 34-72 34-100 0z"/><circle cx="100" cy="150" r="16"/><circle cx="100" cy="150" r="5"/>${Array.from({ length: 9 }, (_, i) => `<path d="M100 106V92" transform="rotate(${(i - 4) * 18} 100 150)"/>`).join("")}`,
+    tools: `<path d="M68 196l56-80M132 196l-56-80"/><rect x="112" y="98" width="28" height="14" transform="rotate(-55 126 105)"/><rect x="60" y="98" width="28" height="14" transform="rotate(55 74 105)"/><path d="M88 214h24"/><path d="M100 70l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"/>`,
+    buffalo: `<path d="M64 120c-14-6-18-22-10-34 2 14 12 20 24 20M136 120c14-6 18-22 10-34-2 14-12 20-24 20"/><path d="M76 112c8-8 40-8 48 0l8 30c-4 30-20 50-32 54-12-4-28-24-32-54z"/><circle cx="88" cy="140" r="3"/><circle cx="112" cy="140" r="3"/><path d="M92 176c4 4 12 4 16 0"/>`,
+    pillar: `<path d="M64 206h72M70 196h60M76 196V112M124 196V112M90 196V112M110 196V112M70 112h60M64 102h72l-36-26z"/>`,
+    waves: `<circle cx="100" cy="112" r="22"/>${[0, 1, 2].map((k) => `<path d="M52 ${158 + k * 18}c12-10 20-10 32 0s20 10 32 0 20-10 32 0"/>`).join("")}`,
+    wheel: `<circle cx="100" cy="150" r="46"/><circle cx="100" cy="150" r="14"/>${Array.from({ length: 8 }, (_, i) => `<path d="M100 136V104" transform="rotate(${i * 45} 100 150)"/>`).join("")}<path d="M46 108l-8 10M154 192l8-10M38 118l12 0M162 182l-12 0"/>`,
+    lantern: `<path d="M86 96h28M90 96v-8h20v8M82 104h36l-6 70H88z"/><path d="M100 120c-8 10-8 22 0 30 8-8 8-20 0-30z"/><path d="M80 210c20-14 40-14 60 0M100 182v28"/>`,
+    bridge: `<path d="M44 186h112M50 186c14-56 86-56 100 0M64 186v-32M82 186v-48M100 186v-52M118 186v-48M136 186v-32"/><path d="M44 204c20-6 40 6 56 0s36-6 56 0"/>`,
+    anvil: `<path d="M60 130h80c0 12-14 18-28 18v26h16v12H72v-12h16v-26c-22 0-28-10-28-18z"/><path d="M128 98l-20 20M118 92l16 16"/><path d="M76 104l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>`,
+    letter: `<rect x="62" y="122" width="76" height="52"/><path d="M62 122l38 30 38-30"/><path d="M62 132c-20-10-34-30-30-48 10 14 20 18 34 20M138 132c20-10 34-30 30-48-10 14-20 18-34 20"/>`,
+  };
+  function faceSVG(c) {
+    return `<svg viewBox="0 0 200 340" role="img" aria-label="${e(c.n + " · " + c.name)}">${G}
+      <rect width="200" height="340" fill="url(#night)"/>
+      ${Array.from({ length: 24 }, (_, i) => `<circle cx="${(i * 37) % 200}" cy="${(i * 71) % 340}" r="${i % 3 ? .6 : 1.1}" fill="#fbefc6" opacity=".5"/>`).join("")}
+      <rect x="7" y="7" width="186" height="326" rx="8" fill="none" stroke="url(#gold)" stroke-width="2"/>
+      <rect x="13" y="13" width="174" height="314" rx="5" fill="none" stroke="url(#gold)" stroke-width=".8"/>
+      ${[[13, 13], [187, 13], [13, 327], [187, 327]].map(([x, y]) => `<path d="M${x} ${y + (y < 100 ? 16 : -16)}A16 16 0 0 ${x < 100 === y < 100 ? 1 : 0} ${x + (x < 100 ? 16 : -16)} ${y}" fill="none" stroke="url(#gold)"/>`).join("")}
+      <text x="100" y="44" text-anchor="middle" font-family="Cinzel, serif" font-size="20" fill="url(#gold)" letter-spacing="3">${e(c.n)}</text>
+      <circle cx="100" cy="150" r="70" fill="url(#halo)"/>
+      <g fill="none" stroke="url(#gold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${SYM[c.sym] || SYM.eye}</g>
+      <path d="M24 262h152l-8 14 8 14H24l8-14z" fill="#0b0f26" stroke="url(#gold)"/>
+      <text x="100" y="281" text-anchor="middle" font-family="Cinzel, serif" font-weight="600" font-size="${c.name.length > 14 ? 11 : 13}" fill="#f3ead7" letter-spacing="1.5">${e(c.name.toUpperCase())}</text>
+      <text x="100" y="312" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#d9cdb2">${e(c.who.length > 28 ? c.who.slice(0, 27) + "…" : c.who)}</text>
+    </svg>`;
+  }
+  const BACK = `<svg viewBox="0 0 200 340" aria-hidden="true">${G}
+    <rect width="200" height="340" fill="#101533"/>
+    <rect x="7" y="7" width="186" height="326" rx="8" fill="none" stroke="url(#gold)" stroke-width="2"/>
+    <g fill="none" stroke="url(#gold)" stroke-width="1">
+      ${Array.from({ length: 10 }, (_, i) => `<circle cx="100" cy="170" r="${8 + i * 9}" opacity="${1 - i * .08}"/>`).join("")}
+      ${Array.from({ length: 24 }, (_, i) => `<path d="M100 170L100 70" transform="rotate(${i * 15} 100 170)" opacity=".5"/>`).join("")}
+      <path d="M100 30l6 14 14 6-14 6-6 14-6-14-14-6 14-6z"/><path d="M100 270l6 14 14 6-14 6-6 14-6-14-14-6 14-6z"/>
+    </g>
+    <circle cx="100" cy="170" r="22" fill="#101533" stroke="url(#gold)"/><path d="M106 160a12 12 0 1 0 0 20 10 10 0 1 1 0-20z" fill="url(#gold)"/>
+  </svg>`;
+
+
+
+  const table = $("#table");
+  table.innerHTML = deck.map((c, i) => `<button class="card" type="button" data-i="${i}" aria-label="${e(c.n + " · " + c.name)}">
+    <div class="inner"><div class="face back">${BACK}</div><div class="face front">${faceSVG(c)}</div></div></button>`).join("");
+  const cards = [...table.querySelectorAll(".card")];
+
+  /* ---------------- Layout ---------------- */
+  let state = "deck", chosen = -1, cw = 0, ch = 0;
+  const narrow = () => innerWidth < 760;
+  function measure() { const r = cards[0].getBoundingClientRect(); cw = r.width; ch = r.height; }
+  const place = (el, x, y, rot = 0, s = 1) => { el.style.transform = `translate(${x - cw / 2}px, ${y - ch / 2}px) rotate(${rot}deg) scale(${s})`; };
+  function layout() {
+    measure();
+    const W = innerWidth, H = innerHeight;
+    if (state === "deck") {
+      cards.forEach((c, i) => { place(c, W / 2 + i * .6, H * .56 - i * .8, (i % 3 - 1) * 1.2); c.style.zIndex = i; });
+      return;
+    }
+    // fan along an arc
+    const n = cards.length, spread = narrow() ? 20 : 30, R = narrow() ? W * .9 : Math.max(900, W * .8);
+    const cx = W / 2, pivotY = H * (narrow() ? .6 : .6) + R;
+    cards.forEach((c, i) => {
+      if (state === "read" && i === chosen) return;
+      const a = (-spread + (2 * spread) * i / (n - 1)) * Math.PI / 180;
+      place(c, cx + R * Math.sin(a), pivotY - R * Math.cos(a) + (state === "read" ? 60 : 0), a * 180 / Math.PI);
+      c.style.zIndex = i;
+    });
+    if (state === "read") {
+      const c = cards[chosen];
+      const s = narrow() ? 1.25 : 1.9;
+      const x = narrow() ? W / 2 : W * .3, y = narrow() ? 24 + ch * s / 2 : H / 2;
+      place(c, x, y, 0, s); c.style.zIndex = 50;
+      const rd = $("#read");
+      if (narrow()) Object.assign(rd.style, { left: "20px", right: "20px", top: (y + ch * s / 2 + 20) + "px", bottom: "auto", maxWidth: "none", transform: "" });
+      else Object.assign(rd.style, { left: (x + cw * s / 2 + 56) + "px", right: "auto", top: "50%", bottom: "auto", maxWidth: Math.min(520, W - (x + cw * s / 2 + 90)) + "px" });
+      if (!narrow()) rd.style.transform = document.body.classList.contains("reading") ? "translateY(-50%)" : "translateY(calc(-50% + 14px))";
+    }
+  }
+
+  /* ---------------- Interaction ---------------- */
+  function fan() { if (state !== "deck") return; state = "fan"; $("#hint").innerHTML = "<span>Choose a card</span>"; layout(); }
+  function read(i) {
+    chosen = i; state = "read";
+    cards.forEach((c, k) => c.classList.toggle("chosen", k === i));
+    cards[i].classList.add("up");
+    const d = deck[i];
+    $("#read").innerHTML = `<p class="num">${e(d.n)} · ${e(d.section)}</p><h2>${e(d.name)}</h2>
+      <p class="who">${e(d.who)}</p>${d.when.includes(" · ") ? `<p class="when">${e(d.when)}</p>` : ""}<p class="say">${e(d.say)}</p>
+      ${d.list ? `<ul>${d.list.map((x) => `<li>${x}</li>`).join("")}</ul>` : ""}
+      ${d.tags ? `<p class="when" style="margin-top:-6px">${e(d.tags.join(" · "))}</p>` : ""}
+      <div class="nav"><button class="btn solid" type="button" data-go="1">Next card →</button><button class="btn" type="button" data-go="0">Back to the spread</button></div>`;
+    document.body.classList.add("reading");
+    layout();
+    $("#read").querySelector("[data-go='1']").focus({ preventScroll: true });
+  }
+  function back() {
+    if (state !== "read") return;
+    cards[chosen].classList.remove("chosen");
+    document.body.classList.remove("reading"); state = "fan"; layout();
+    cards[chosen].focus({ preventScroll: true });
+  }
+  table.addEventListener("click", (ev) => {
+    const c = ev.target.closest(".card"); if (!c) return;
+    if (state === "deck") return fan();
+    if (state === "fan") return read(+c.dataset.i);
+  });
+  cards.forEach((c) => {
+    c.addEventListener("pointerenter", () => { if (state === "fan") { c.classList.add("lift"); c.style.transform += " translateY(-18px)"; } });
+    c.addEventListener("pointerleave", () => { c.classList.remove("lift"); if (state === "fan") layout(); });
+  });
+  $("#read").addEventListener("click", (ev) => {
+    const b = ev.target.closest("[data-go]"); if (!b) return;
+    if (b.dataset.go === "0") return back();
+    const nx = (chosen + 1) % deck.length;
+    cards[chosen].classList.remove("chosen");
+    read(nx);
+  });
+  document.addEventListener("click", (ev) => { if (state === "read" && !ev.target.closest(".card, .read, .gs-switch")) back(); });
+  addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") back();
+    if (state === "read" && ev.key === "ArrowRight") { cards[chosen].classList.remove("chosen"); read((chosen + 1) % deck.length); }
+    if (state === "read" && ev.key === "ArrowLeft") { cards[chosen].classList.remove("chosen"); read((chosen - 1 + deck.length) % deck.length); }
+    if (state === "deck" && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); fan(); }
+  });
+  addEventListener("resize", layout);
+
+  const boot = () => {
+    cards.forEach((c) => c.style.transition = "none");
+    layout(); void table.offsetWidth;
+    cards.forEach((c) => c.style.transition = "");
+    const m = location.hash.match(/card=(\d)/);
+    if (/fan|card=/.test(location.hash)) { state = "fan"; $("#hint").innerHTML = "<span>Choose a card</span>"; cards.forEach((c) => c.style.transition = "none"); layout(); void table.offsetWidth; cards.forEach((c) => c.style.transition = ""); }
+    if (m) read(+m[1]);
+  };
+  document.fonts ? document.fonts.ready.then(boot) : boot();
+})();
+</script>
+</body>
+</html>

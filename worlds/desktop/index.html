@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" data-world="desktop" data-switcher="br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Grigory 98 — Grigory Shatalin</title>
+<meta name="description" content="Grigory Shatalin, software engineer — a desktop operating system. Click an icon to explore." />
+<script src="../../shared/data.js"></script>
+<script src="../../shared/kit.js"></script>
+<style>
+:root {
+  --face: #c0c0c0; --hl: #ffffff; --lt: #dfdfdf; --sh: #808080; --dk: #0a0a0a;
+  --navy: #000080; --sel: #000080; --desk: #008080;
+  --raised: inset -1px -1px var(--dk), inset 1px 1px var(--hl), inset -2px -2px var(--sh), inset 2px 2px var(--lt);
+  --sunken: inset -1px -1px var(--hl), inset 1px 1px var(--sh), inset -2px -2px var(--lt), inset 2px 2px var(--dk);
+  --field: inset -1px -1px var(--hl), inset 1px 1px var(--sh), inset -2px -2px var(--lt), inset 2px 2px var(--dk);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--desk); font: 12px/1.35 Tahoma, "MS Sans Serif", Verdana, "Segoe UI", sans-serif; color: #000; -webkit-font-smoothing: none; user-select: none; -webkit-user-select: none; }
+button { font: inherit; color: inherit; }
+.btn { background: var(--face); border: 0; box-shadow: var(--raised); padding: 5px 14px; min-width: 76px; cursor: pointer; }
+.btn:active, .btn.on { box-shadow: var(--sunken); }
+.btn:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
+a { color: #0000ee; }
+
+/* Boot */
+.boot { position: fixed; inset: 0; z-index: 100; background: #000; display: grid; place-items: center; color: #fff; transition: opacity .4s; }
+.boot.done { opacity: 0; pointer-events: none; }
+.boot-inner { text-align: center; }
+.logo { display: inline-grid; grid-template-columns: 22px 22px; gap: 4px; transform: skewY(-8deg) perspective(200px) rotateY(-14deg); margin-bottom: 18px; }
+.logo i { width: 22px; height: 22px; }
+.logo i:nth-child(1) { background: #e8432c; } .logo i:nth-child(2) { background: #3fa142; } .logo i:nth-child(3) { background: #2a69d8; } .logo i:nth-child(4) { background: #f6c22b; }
+.boot h1 { font: italic 700 40px/1 "Franklin Gothic Medium", "Arial Black", Arial, sans-serif; margin: 0; letter-spacing: -1px; }
+.boot h1 sup { font-size: 22px; color: #f6c22b; font-style: normal; }
+.boot p { margin: 8px 0 26px; color: #aaa; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+.bar { width: 220px; height: 14px; margin: 0 auto; padding: 2px; border: 1px solid #555; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 40px; background: repeating-linear-gradient(90deg, #2a69d8 0 8px, transparent 8px 10px); animation: slide 1s linear infinite; }
+@keyframes slide { from { transform: translateX(-40px); } to { transform: translateX(220px); } }
+
+/* Desktop icons */
+.icons { position: absolute; left: 8px; top: 8px; bottom: 40px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 6px 4px; }
+.icon { width: 82px; padding: 4px 2px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: default; background: none; border: 0; color: #fff; text-align: center; }
+.icon svg { width: 32px; height: 32px; image-rendering: pixelated; }
+.icon span { padding: 1px 3px; font-size: 11px; line-height: 1.25; text-shadow: none; }
+.icon:focus { outline: none; }
+.icon.sel span, .icon:focus-visible span { background: var(--sel); outline: 1px dotted #fff; }
+.icon.sel svg { filter: brightness(.6) sepia(1) hue-rotate(190deg) saturate(4); }
+
+/* Windows */
+.win { position: absolute; background: var(--face); box-shadow: var(--raised), 2px 2px 0 rgba(0,0,0,.25); padding: 3px; display: flex; flex-direction: column; min-width: 220px; min-height: 120px; }
+.win.max { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 34px) !important; }
+.win[hidden] { display: none; }
+.title { display: flex; align-items: center; gap: 4px; height: 20px; padding: 0 2px 0 3px; color: #fff; font-weight: 700; background: linear-gradient(90deg, #808080, #b5b5b5); cursor: default; touch-action: none; }
+.win.active .title { background: linear-gradient(90deg, var(--navy), #1084d0); }
+.title svg { width: 16px; height: 16px; flex: none; }
+.title span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title button { width: 18px; height: 16px; padding: 0; background: var(--face); border: 0; box-shadow: var(--raised); color: #000; font: 700 11px/1 Marlett, Tahoma, sans-serif; display: grid; place-items: center; cursor: pointer; }
+.title button:active { box-shadow: var(--sunken); }
+.title button + button.x { margin-left: 2px; }
+.menubar { display: flex; gap: 2px; padding: 2px 0; }
+.menubar span { padding: 2px 7px; }
+.menubar span:first-letter { text-decoration: underline; }
+.body { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.body svg { width: 32px; height: 32px; flex: none; }
+.gs-switch[data-pos="br"] { bottom: calc(44px + env(safe-area-inset-bottom)) !important; }
+.pane { background: #fff; box-shadow: var(--sunken); padding: 8px 10px; }
+.status { display: flex; gap: 2px; margin-top: 2px; }
+.status span { flex: 1; box-shadow: inset -1px -1px var(--hl), inset 1px 1px var(--sh); padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resize { position: absolute; right: 2px; bottom: 2px; width: 12px; height: 12px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 0 45%, var(--sh) 45% 52%, transparent 52% 62%, var(--sh) 62% 69%, transparent 69% 79%, var(--sh) 79% 86%, transparent 86%); touch-action: none; }
+.win.max .resize { display: none; }
+.address { display: flex; align-items: center; gap: 6px; padding: 3px 2px 5px; }
+.address div { flex: 1; background: #fff; box-shadow: var(--field); padding: 3px 6px; }
+.files { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; padding: 10px; min-height: 100%; }
+.files .icon { color: #000; width: 92px; }
+.files .icon.sel span { color: #fff; }
+
+/* Documents */
+.doc { background: #fff; box-shadow: var(--sunken); padding: 24px 30px; font-family: "Times New Roman", Times, serif; font-size: 15px; line-height: 1.5; user-select: text; -webkit-user-select: text; }
+.doc h1 { font-size: 24px; margin: 0 0 2px; }
+.doc h2 { font-size: 15px; font-weight: 400; font-style: italic; margin: 0 0 14px; color: #333; }
+.doc ul { padding-left: 22px; } .doc li { margin-bottom: 8px; }
+.mono { font-family: "Lucida Console", "Courier New", monospace; font-size: 13px; white-space: pre-wrap; line-height: 1.45; user-select: text; -webkit-user-select: text; margin: 0; }
+.tree { list-style: none; margin: 0; padding: 4px 4px 4px 0; }
+.tree ul { list-style: none; margin: 0; padding-left: 22px; border-left: 1px dotted var(--sh); margin-left: 9px; }
+.tree li { padding: 1px 0; }
+.tree button { border: 0; background: none; padding: 1px 3px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.tree button:focus-visible, .tree button.sel { background: var(--sel); color: #fff; outline: 1px dotted #fff; }
+.body .tree svg { width: 16px; height: 16px; }
+.pie { width: 90px; height: 90px; border-radius: 50%; box-shadow: 0 6px 0 #6a6aa8; }
+.field { background: #fff; box-shadow: var(--field); padding: 4px 6px; border: 0; font: inherit; width: 100%; }
+textarea.field { resize: none; font-family: inherit; }
+.row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.row label { width: 56px; }
+fieldset { border: 0; box-shadow: inset -1px -1px var(--hl), inset 1px 1px var(--sh), inset -2px -2px var(--sh), inset 2px 2px var(--hl); padding: 10px 12px; margin: 8px 0; }
+legend { padding: 0 4px; }
+
+/* Taskbar */
+.taskbar { position: fixed; left: 0; right: 0; bottom: 0; height: 34px; padding: 3px 2px calc(3px + env(safe-area-inset-bottom)); background: var(--face); box-shadow: inset 0 1px var(--lt), inset 0 2px var(--hl); display: flex; gap: 4px; align-items: stretch; z-index: 50; }
+.start { display: flex; align-items: center; gap: 4px; padding: 0 6px; font-weight: 700; min-width: 0; }
+.start .logo { transform: none; grid-template-columns: 7px 7px; gap: 1px; margin: 0; }
+.start .logo i { width: 7px; height: 7px; }
+.tasks { flex: 1; display: flex; gap: 3px; min-width: 0; overflow: hidden; }
+.task { flex: 0 1 160px; min-width: 40px; display: flex; align-items: center; gap: 4px; padding: 0 6px; text-align: left; white-space: nowrap; overflow: hidden; }
+.task svg { width: 16px; height: 16px; flex: none; }
+.task span { overflow: hidden; text-overflow: ellipsis; }
+.task.on { background: repeating-conic-gradient(var(--face) 0 25%, #fff 0 50%) 0 0 / 2px 2px; font-weight: 700; }
+.quick { display: flex; gap: 3px; padding: 0 6px; border-left: 1px solid var(--sh); box-shadow: inset 1px 0 var(--hl); }
+.quick .btn { min-width: 0; padding: 0 10px; display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.quick svg { width: 16px; height: 16px; }
+.tray { display: flex; align-items: center; gap: 6px; padding: 0 10px; box-shadow: inset -1px -1px var(--hl), inset 1px 1px var(--sh); }
+.startmenu { position: fixed; left: 2px; bottom: 34px; z-index: 60; display: flex; background: var(--face); box-shadow: var(--raised); padding: 3px; min-width: 210px; }
+.startmenu[hidden] { display: none; }
+.banner { width: 24px; background: linear-gradient(0deg, var(--navy), #1084d0); color: #fff; writing-mode: vertical-rl; transform: rotate(180deg); padding: 8px 0; font: 700 18px/24px Arial, sans-serif; }
+.banner b { color: #c0c0c0; font-weight: 400; }
+.startmenu ul { list-style: none; margin: 0; padding: 0; flex: 1; }
+.startmenu li button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border: 0; background: none; text-align: left; cursor: pointer; }
+.startmenu li button:hover, .startmenu li button:focus-visible { background: var(--sel); color: #fff; outline: none; }
+.startmenu li button svg { width: 24px; height: 24px; }
+.startmenu hr { border: 0; border-top: 1px solid var(--sh); border-bottom: 1px solid var(--hl); margin: 3px 2px; }
+.shutdown { position: fixed; inset: 0; z-index: 90; background: repeating-conic-gradient(rgba(0,0,0,.5) 0 25%, transparent 0 50%) 0 0 / 2px 2px; display: grid; place-items: center; }
+.shutdown[hidden] { display: none; }
+.safe { position: fixed; inset: 0; z-index: 95; background: #000; color: #f39b3a; display: grid; place-items: center; font: 700 22px Arial, sans-serif; text-align: center; padding: 20px; }
+.safe[hidden] { display: none; }
+
+/* Minesweeper */
+.ms { padding: 6px; display: inline-flex; flex-direction: column; gap: 6px; box-shadow: var(--raised); }
+.ms-head { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; box-shadow: var(--sunken); }
+.ms-led { background: #000; color: #f00; font: 700 20px/1 "Courier New", monospace; padding: 2px 4px; letter-spacing: 1px; min-width: 46px; text-align: right; }
+.ms-face { width: 30px; height: 30px; font-size: 17px; padding: 0; display: grid; place-items: center; box-shadow: var(--raised); background: var(--face); border: 0; cursor: pointer; }
+.ms-grid { display: grid; grid-template-columns: repeat(9, 22px); box-shadow: var(--sunken); padding: 3px; }
+.ms-grid button { width: 22px; height: 22px; padding: 0; border: 0; background: var(--face); box-shadow: var(--raised); font: 700 13px/1 Tahoma, sans-serif; cursor: pointer; }
+.ms-grid button.open { box-shadow: inset 1px 1px var(--sh); }
+.ms-grid button.boom { background: #f00; }
+@media (max-width: 700px) {
+  .icons { flex-direction: row; right: 8px; bottom: auto; justify-content: flex-start; }
+  .icon { width: 25%; min-width: 0; }
+  .task span { display: none; }
+  .welcome { flex-direction: column; } .welcome > div:last-child { width: auto !important; }
+  .quick .btn span { display: none; } .quick .btn { padding: 0 7px; } .tasks { display: none; }
+  .task { flex: 0 0 40px; justify-content: center; }
+}
+</style>
+</head>
+<body>
+<div class="boot" id="boot" aria-hidden="true"><div class="boot-inner">
+  <div class="logo"><i></i><i></i><i></i><i></i></div>
+  <h1>Grigory<sup>98</sup></h1>
+  <p>Starting up…</p>
+  <div class="bar"><span></span></div>
+</div></div>
+<main id="desk" aria-label="Desktop">
+  <div class="icons" id="icons" role="list"></div>
+</main>
+<div class="startmenu" id="startmenu" hidden role="menu"></div>
+<footer class="taskbar">
+  <button class="btn start" id="startBtn" aria-expanded="false" aria-controls="startmenu"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Start</button>
+  <div class="quick" id="quick" aria-label="Quick launch"></div>
+  <div class="tasks" id="tasks"></div>
+  <div class="tray"><span id="clock"></span></div>
+</footer>
+<div class="shutdown" id="shutdown" hidden></div>
+<div class="safe" id="safe" hidden><div>It's now safe to turn off<br>your computer.<p style="font-size:13px;color:#888;font-weight:400">(Or click anywhere to visit another world.)</p></div></div>
+
+<script>
+(function () {
+  const P = window.PORTFOLIO, K = window.Kit, e = K.esc;
+  const $ = (s, r = document) => r.querySelector(s);
+  const narrow = () => innerWidth < 700;
+
+  /* ================= Pixel icons (32×32 SVG) ================= */
+  const sv = (body, vb = 32) => `<svg viewBox="0 0 ${vb} ${vb}" shape-rendering="crispEdges" aria-hidden="true">${body}</svg>`;
+  const ICON = {
+    computer: sv(`<rect x="4" y="3" width="24" height="18" fill="#c0c0c0" stroke="#000"/><rect x="7" y="6" width="18" height="12" fill="#008080"/><rect x="8" y="7" width="6" height="2" fill="#7fd"/><rect x="11" y="21" width="10" height="3" fill="#808080"/><rect x="6" y="24" width="20" height="5" fill="#c0c0c0" stroke="#000"/><rect x="20" y="26" width="4" height="1" fill="#0a0"/>`),
+    folder: sv(`<path d="M3 8h9l2 2h15v17H3z" fill="#f8d775" stroke="#000"/><path d="M3 12h26v15H3z" fill="#fbe39c" stroke="#000"/>`),
+    doc: sv(`<path d="M7 3h13l6 6v20H7z" fill="#fff" stroke="#000"/><path d="M20 3v6h6" fill="#ddd" stroke="#000"/><g fill="#000080"><rect x="10" y="12" width="12" height="1"/><rect x="10" y="15" width="12" height="1"/><rect x="10" y="18" width="9" height="1"/><rect x="10" y="21" width="12" height="1"/></g>`),
+    notepad: sv(`<rect x="6" y="4" width="20" height="25" fill="#fff" stroke="#000"/><rect x="6" y="4" width="20" height="4" fill="#4a7ad8" stroke="#000"/><g fill="#555"><rect x="9" y="12" width="14" height="1"/><rect x="9" y="15" width="14" height="1"/><rect x="9" y="18" width="10" height="1"/><rect x="9" y="21" width="14" height="1"/></g>`),
+    mail: sv(`<rect x="3" y="8" width="26" height="17" fill="#fff" stroke="#000"/><path d="M3 8l13 10 13-10" fill="none" stroke="#000"/><rect x="21" y="3" width="8" height="8" fill="#f6c22b" stroke="#000"/>`),
+    mine: sv(`<circle cx="16" cy="16" r="8" fill="#000"/><g stroke="#000" stroke-width="2"><path d="M16 4v24M4 16h24M8 8l16 16M24 8L8 24"/></g><rect x="12" y="12" width="3" height="3" fill="#fff"/>`),
+    chip: sv(`<rect x="8" y="8" width="16" height="16" fill="#2b2b2b" stroke="#000"/><g fill="#c9a227">${[10, 14, 18, 22].map((v) => `<rect x="${v - 1}" y="4" width="2" height="4"/><rect x="${v - 1}" y="24" width="2" height="4"/><rect x="4" y="${v - 1}" width="4" height="2"/><rect x="24" y="${v - 1}" width="4" height="2"/>`).join("")}</g><rect x="12" y="12" width="8" height="8" fill="#4a7ad8"/>`),
+    pdf: sv(`<path d="M7 3h13l6 6v20H7z" fill="#fff" stroke="#000"/><rect x="5" y="17" width="18" height="8" fill="#d0312d"/><text x="7" y="24" font-size="7" font-family="Arial" font-weight="700" fill="#fff">PDF</text>`),
+    recycle: sv(`<path d="M8 9h16l-2 19H10z" fill="#e8e8e8" stroke="#000"/><rect x="6" y="6" width="20" height="3" fill="#c0c0c0" stroke="#000"/><g fill="#0a8a3a"><path d="M13 14l3-3 3 3h-2v4h-2v-4z"/><rect x="12" y="20" width="8" height="2"/></g>`),
+    exe: sv(`<rect x="4" y="5" width="24" height="22" fill="#c0c0c0" stroke="#000"/><rect x="4" y="5" width="24" height="5" fill="#000080"/><rect x="8" y="14" width="16" height="9" fill="#fff" stroke="#000"/><rect x="10" y="16" width="5" height="5" fill="#d0312d"/>`),
+    drive: sv(`<rect x="3" y="11" width="26" height="12" fill="#c0c0c0" stroke="#000"/><rect x="6" y="18" width="5" height="2" fill="#0c0"/><rect x="16" y="14" width="10" height="2" fill="#808080"/>`),
+    help: sv(`<circle cx="16" cy="16" r="12" fill="#f6c22b" stroke="#000"/><text x="11" y="23" font-size="18" font-family="Georgia" font-weight="700" fill="#000">?</text>`),
+    power: sv(`<rect x="5" y="5" width="22" height="22" fill="#c0c0c0" stroke="#000"/><path d="M12 11a7 7 0 1 0 8 0" fill="none" stroke="#d0312d" stroke-width="3"/><rect x="15" y="7" width="3" height="9" fill="#d0312d"/>`),
+    globe: sv(`<circle cx="16" cy="16" r="12" fill="#4a7ad8" stroke="#000"/><path d="M8 11c4 1 5 4 3 6s1 5 3 6M19 6c-1 3 2 4 4 4s3 4 1 6" fill="none" stroke="#3fa142" stroke-width="3"/>`),
+  };
+
+  /* ================= Window manager ================= */
+  const wins = new Map();
+  let z = 10, cascade = 0;
+  function open(id, opts) {
+    if (wins.has(id)) { const w = wins.get(id); w.el.hidden = false; focus(id); return w; }
+    const el = document.createElement("section");
+    el.className = "win"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", opts.title);
+    const W = Math.min(opts.w || 460, innerWidth - 16), H = Math.min(opts.h || 340, innerHeight - 50);
+    const x = opts.x ?? Math.max(8, Math.min(innerWidth - W - 8, 110 + cascade * 26)), y = opts.y ?? Math.max(8, Math.min(innerHeight - H - 42, 30 + cascade * 24));
+    cascade = (cascade + 1) % 8;
+    Object.assign(el.style, { left: x + "px", top: y + "px", width: W + "px", height: H + "px" });
+    el.innerHTML = `<div class="title">${ICON[opts.icon] || ""}<span>${e(opts.title)}</span>
+      <button type="button" data-a="min" aria-label="Minimize">_</button><button type="button" data-a="max" aria-label="Maximize">□</button><button type="button" class="x" data-a="close" aria-label="Close">✕</button></div>
+      ${opts.menu ? `<div class="menubar">${opts.menu.map((m) => `<span>${e(m)}</span>`).join("")}</div>` : ""}
+      <div class="body">${opts.html}</div>
+      ${opts.status ? `<div class="status">${opts.status.map((s) => `<span>${e(s)}</span>`).join("")}</div>` : ""}
+      ${opts.fixed ? "" : '<div class="resize" aria-hidden="true"></div>'}`;
+    if (opts.fixed) { el.style.width = "auto"; el.style.height = "auto"; }
+    document.getElementById("desk").appendChild(el);
+    const task = document.createElement("button");
+    task.className = "btn task"; task.innerHTML = `${ICON[opts.icon] || ""}<span>${e(opts.title)}</span>`; task.title = opts.title;
+    task.onclick = () => { const w = wins.get(id); if (!w.el.hidden && w.el.classList.contains("active")) minimize(id); else { w.el.hidden = false; focus(id); } };
+    $("#tasks").appendChild(task);
+    const w = { el, task, opts };
+    wins.set(id, w);
+    if (narrow() && !opts.fixed) el.classList.add("max");
+    if (opts.fixed && narrow()) { el.style.left = "8px"; el.style.top = "40px"; }
+    el.addEventListener("pointerdown", () => focus(id));
+    el.querySelector(".title").addEventListener("dblclick", () => !opts.fixed && el.classList.toggle("max"));
+    el.querySelectorAll(".title button").forEach((b) => b.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const a = b.dataset.a;
+      if (a === "close") close(id); else if (a === "min") minimize(id); else if (!opts.fixed) el.classList.toggle("max");
+    }));
+    dragify(el, el.querySelector(".title"), "move");
+    const rz = el.querySelector(".resize"); if (rz) dragify(el, rz, "size");
+    focus(id);
+    if (opts.init) opts.init(el, w);
+    return w;
+  }
+  function focus(id) {
+    wins.forEach((w, k) => { w.el.classList.toggle("active", k === id); w.task.classList.toggle("on", k === id && !w.el.hidden); });
+    const w = wins.get(id); if (w) w.el.style.zIndex = ++z;
+  }
+  function minimize(id) { if (narrow()) return close(id); const w = wins.get(id); w.el.hidden = true; w.task.classList.remove("on"); }
+  function close(id) { const w = wins.get(id); if (!w) return; w.el.remove(); w.task.remove(); wins.delete(id); if (w.opts.onClose) w.opts.onClose(); }
+  function dragify(el, handle, mode) {
+    handle.addEventListener("pointerdown", (ev) => {
+      if (ev.target.closest("button") || el.classList.contains("max")) return;
+      ev.preventDefault();
+      const sx = ev.clientX, sy = ev.clientY, r = el.getBoundingClientRect();
+      handle.setPointerCapture(ev.pointerId);
+      const move = (m) => {
+        const dx = m.clientX - sx, dy = m.clientY - sy;
+        if (mode === "move") {
+          el.style.left = Math.max(-r.width + 60, Math.min(innerWidth - 60, r.left + dx)) + "px";
+          el.style.top = Math.max(0, Math.min(innerHeight - 60, r.top + dy)) + "px";
+        } else {
+          el.style.width = Math.max(220, r.width + dx) + "px"; el.style.height = Math.max(120, r.height + dy) + "px";
+        }
+      };
+      const up = () => { handle.removeEventListener("pointermove", move); handle.removeEventListener("pointerup", up); };
+      handle.addEventListener("pointermove", move); handle.addEventListener("pointerup", up);
+    });
+  }
+  // Single click selects, double click (or Enter, or a tap on touch screens) opens.
+  function wireIcons(root, onOpen) {
+    root.addEventListener("click", (ev) => {
+      const ic = ev.target.closest(".icon"); root.querySelectorAll(".icon.sel").forEach((x) => x.classList.remove("sel"));
+      if (!ic) return; ic.classList.add("sel");
+      onOpen(ic.dataset.id); // one click opens — no double-click guessing
+    });
+    root.addEventListener("keydown", (ev) => { const ic = ev.target.closest(".icon"); if (ic && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); onOpen(ic.dataset.id); } });
+  }
+  const iconBtn = (id, icon, label) => `<button type="button" class="icon" data-id="${e(id)}" role="listitem">${ICON[icon]}<span>${e(label)}</span></button>`;
+
+  /* ================= Apps ================= */
+  const ext = 'target="_blank" rel="noopener noreferrer"';
+  const APPS = {
+    about: () => open("about", {
+      title: "About Me.txt - Notepad", icon: "notepad", w: 520, h: 380, menu: ["File", "Edit", "Search", "Help"],
+      html: `<div class="pane" style="min-height:100%"><p class="mono">${e(
+`${P.name.toUpperCase()}
+${P.role}
+${"=".repeat(P.name.length)}
+
+${P.intro}
+
+Based in: ${P.location}
+
+PRINCIPLES
+  1. ${P.principles[0]}
+  2. ${P.principles[1]}
+  3. ${P.principles[2]}
+
+Tip: double-click the folders on the desktop.`)}</p></div>`,
+    }),
+    experience: () => explorer("experience", "Experience", "C:\\Grigory\\Experience",
+      P.experience.map((x) => ({ id: "exp:" + x.id, icon: "doc", label: `${x.orgShort}.doc` })), `${P.experience.length} object(s)`),
+    projects: () => explorer("projects", "Projects", "C:\\Grigory\\Projects",
+      P.projects.map((p) => ({ id: "proj:" + p.id, icon: "exe", label: `${p.name.replace(/[^\w]+/g, "")}.exe` })), `${P.projects.length} object(s)`),
+    computer: () => explorer("computer", "My Computer", "My Computer",
+      P.education.map((d, i) => ({ id: "edu:" + d.id, icon: "drive", label: `${d.schoolShort.toUpperCase().replace(/\s+/g, "_")} (${"CD"[i]}:)` })), "Click a drive to see its properties"),
+    recycle: () => explorer("recycle", "Recycle Bin", "Recycle Bin",
+      [{ id: "bin:clever", icon: "exe", label: "cleverness.exe" }, { id: "bin:novel", icon: "doc", label: "novelty_first.doc" }, { id: "bin:unowned", icon: "folder", label: "code_nobody_owns" }],
+      "Deleted on purpose."),
+    skills: () => open("skills", {
+      title: "Device Manager", icon: "chip", w: 420, h: 420,
+      html: `<div class="pane" style="min-height:100%"><ul class="tree" role="tree">
+        <li role="treeitem" aria-expanded="true"><button type="button">${ICON.computer}${e(P.name.toUpperCase().replace(" ", "-"))}</button><ul role="group">
+        ${P.skills.map((s) => `<li role="treeitem" aria-expanded="true"><button type="button" data-toggle>${ICON.folder}${e(s.group)}</button><ul role="group">${s.items.map((it) => `<li role="treeitem"><button type="button">${ICON.chip}${e(it)}</button></li>`).join("")}</ul></li>`).join("")}
+        </ul></li></ul></div>`,
+      status: ["All devices are working properly."],
+      init: (el) => el.querySelector(".tree").addEventListener("click", (ev) => {
+        const b = ev.target.closest("button"); if (!b) return;
+        el.querySelectorAll(".tree button.sel").forEach((x) => x.classList.remove("sel")); b.classList.add("sel");
+        if (b.hasAttribute("data-toggle")) { const li = b.parentElement, ul = li.querySelector("ul"); ul.hidden = !ul.hidden; li.setAttribute("aria-expanded", String(!ul.hidden)); }
+      }),
+    }),
+    resume: () => open("resume", {
+      title: "Software_Engineer_Resume.pdf", icon: "pdf", w: 640, h: Math.min(720, innerHeight - 60),
+      html: `<div style="display:flex;flex-direction:column;height:100%"><div class="address"><span>Address</span><div>${e(P.links.resume)}</div><a class="btn" href="${e(P.links.resume)}" ${ext} style="text-decoration:none;color:#000;min-width:0">Open ↗</a></div>
+        <iframe src="${e(P.links.resume)}" title="Resume PDF" style="flex:1;border:0;box-shadow:var(--sunken);background:#fff;width:100%"></iframe></div>`,
+    }),
+    mail: () => open("mail", {
+      title: "New Message", icon: "mail", w: 520, h: 420, menu: ["File", "Edit", "View", "Insert", "Format"],
+      html: `<form class="pane" id="mailform" style="display:flex;flex-direction:column;gap:2px;height:100%">
+        <div class="row"><label>To:</label><input class="field" value="${e(P.links.email)}" readonly aria-label="To"></div>
+        <div class="row"><label for="msub">Subject:</label><input class="field" id="msub" placeholder="Hello from Grigory 98"></div>
+        <textarea class="field" id="mbody" style="flex:1;min-height:120px" aria-label="Message">Hi Grigory,\n\n</textarea>
+        <fieldset><legend>Address book</legend>${P.contacts.filter((c) => c.id !== "email").map((c) => `<div><a href="${e(c.href)}" ${ext}>${e(c.label)}</a> — ${e(c.handle)}</div>`).join("")}</fieldset>
+        <div style="display:flex;justify-content:flex-end;gap:6px"><button class="btn" type="submit">Send</button></div></form>`,
+      status: ["Your mail app will open to send this."],
+      init: (el) => el.querySelector("#mailform").addEventListener("submit", (ev) => {
+        ev.preventDefault();
+        location.href = `mailto:${P.links.email}?subject=${encodeURIComponent($("#msub", el).value || "Hello")}&body=${encodeURIComponent($("#mbody", el).value)}`;
+      }),
+    }),
+    mines: () => open("mines", { title: "Minesweeper", icon: "mine", fixed: true, menu: ["Game", "Help"], html: `<div style="padding:4px"><div class="ms" id="ms"></div></div>`, init: (el) => minesweeper($("#ms", el)) }),
+    welcome: () => open("welcome", {
+      title: "Welcome", icon: "help", fixed: true, x: narrow() ? 8 : Math.max(8, innerWidth / 2 - 270), y: narrow() ? 40 : Math.max(8, innerHeight / 2 - 210),
+      html: `<div class="welcome" style="display:flex;gap:12px;padding:10px;width:min(540px, calc(100vw - 26px))">
+        <div style="flex:1;display:flex;flex-direction:column">
+          <h2 style="margin:0 0 6px;font:700 22px Arial, sans-serif">Welcome to <span style="color:#000080">Grigory</span> 98</h2>
+          <div class="pane" style="flex:1;font-size:13px;line-height:1.5;min-height:150px"><b>Did you know…</b><br>${e(P.intro)}<br><br><b>Click any icon</b> on the desktop, or use the buttons on the taskbar.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;width:150px">
+          <button class="btn" data-open="experience">Experience</button>
+          <button class="btn" data-open="projects">Projects</button>
+          <button class="btn" data-open="skills">Skills</button>
+          <button class="btn" data-open="mail">Contact</button>
+          <span style="flex:1"></span>
+          <button class="btn" data-close="welcome">Close</button>
+        </div></div>`,
+    }),
+  };
+
+  function explorer(id, title, path, items, status) {
+    return open(id, {
+      title, icon: id === "recycle" ? "recycle" : id === "computer" ? "computer" : "folder", w: 520, h: 340, menu: ["File", "Edit", "View", "Go", "Favorites", "Help"],
+      html: `<div style="display:flex;flex-direction:column;height:100%"><div class="address"><span>Address</span><div>${e(path)}</div></div>
+        <div class="pane" style="flex:1;padding:0"><div class="files" role="list">${items.map((it) => iconBtn(it.id, it.icon, it.label)).join("")}</div></div></div>`,
+      status: [status],
+      init: (el) => wireIcons(el.querySelector(".files"), openItem),
+    });
+  }
+
+  function openItem(key) {
+    const [kind, id] = key.split(":");
+    if (APPS[key]) return APPS[key]();
+    if (kind === "exp") {
+      const x = P.experience.find((v) => v.id === id);
+      return open(key, {
+        title: `${x.orgShort}.doc - WordPad`, icon: "doc", w: 600, h: 460, menu: ["File", "Edit", "View", "Insert", "Format", "Help"],
+        html: `<div class="doc" style="min-height:100%"><h1>${e(x.org)}</h1><h2>${e(x.role)}${x.team ? " · " + e(x.team) : ""} — ${e(x.location)} — ${e(x.dates)}</h2>
+          <ul>${x.bullets.map((b) => `<li>${e(b)}</li>`).join("")}</ul>
+          ${x.link ? `<p><a href="${e(x.link.href)}" ${ext}>${e(x.link.label)}</a></p>` : ""}
+          <p style="color:#555;font-size:13px">Keywords: ${e(x.tags.join(", "))}</p></div>`,
+        status: [x.current ? "Currently working here" : "Completed", e(x.dates)],
+      });
+    }
+    if (kind === "proj") {
+      const p = P.projects.find((v) => v.id === id);
+      return open(key, {
+        title: `${p.name} Properties`, icon: "exe", fixed: true,
+        html: `<div style="padding:8px;width:min(380px, calc(100vw - 30px))">
+          <div style="display:flex;gap:2px;margin-bottom:-1px"><span class="btn on" style="min-width:0;padding:3px 10px">General</span></div>
+          <div style="box-shadow:var(--raised);padding:14px">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">${ICON.exe}<b style="font-size:14px">${e(p.name)}</b></div>
+            <hr style="border:0;border-top:1px solid var(--sh);border-bottom:1px solid #fff">
+            <div class="row"><label>Type:</label><span>${e(p.status)}</span></div>
+            <div class="row" style="align-items:flex-start"><label>Description:</label><span style="flex:1">${e(p.desc)}</span></div>
+            <div class="row"><label>Built with:</label><span>${e(p.tags.join(", "))}</span></div>
+            <div class="row"><label>Location:</label><a href="${e(p.url)}" ${ext}>${e(p.url.replace("https://", ""))}</a></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px"><a class="btn" href="${e(p.url)}" ${ext} style="text-decoration:none;color:#000;text-align:center">Open</a><button class="btn" data-close="${e(key)}">OK</button></div></div>`,
+      });
+    }
+    if (kind === "edu") {
+      const d = P.education.find((v) => v.id === id), pct = (parseFloat(d.gpa) / 4) * 100;
+      return open(key, {
+        title: `${d.schoolShort} Properties`, icon: "drive", fixed: true,
+        html: `<div style="padding:8px;width:min(360px, calc(100vw - 30px))"><div style="box-shadow:var(--raised);padding:14px">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">${ICON.drive}<b>${e(d.school)}</b></div>
+          <div class="row"><label>Type:</label><span>${e(d.degree)}</span></div>
+          <div class="row"><label>Location:</label><span>${e(d.location)}</span></div>
+          <div class="row"><label>Date:</label><span>${e(d.dates)}</span></div>
+          <hr style="border:0;border-top:1px solid var(--sh);border-bottom:1px solid #fff">
+          <div class="row"><span style="width:12px;height:12px;background:#2a2aa8;display:inline-block"></span><span style="flex:1">GPA</span><b>${e(d.gpa)}</b></div>
+          <div class="row"><span style="width:12px;height:12px;background:#d26ad2;display:inline-block"></span><span style="flex:1">Out of</span><b>4.0</b></div>
+          <div style="display:grid;place-items:center;padding:8px 0 4px"><div class="pie" style="background:conic-gradient(#2a2aa8 0 ${pct}%, #d26ad2 0)"></div></div>
+        </div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn" data-close="${e(key)}">OK</button></div></div>`,
+      });
+    }
+    if (kind === "bin") {
+      const t = { clever: [P.principles[1], "cleverness.exe was removed to make room for clarity."], novel: [P.principles[0], "novelty_first.doc was moved below reliability."], unowned: [P.principles[2], "Every line of code here has an owner."] }[id];
+      return dialog("bin" + id, "Recycle Bin", t[1], t[0]);
+    }
+  }
+
+  function dialog(id, title, msg, sub) {
+    return open(id, {
+      title, icon: "help", fixed: true,
+      html: `<div style="padding:14px 14px 10px;max-width:min(360px, calc(100vw - 30px))"><div style="display:flex;gap:12px">${ICON.help}<div><p style="margin:0 0 6px">${e(msg)}</p>${sub ? `<p style="margin:0;font-weight:700">${e(sub)}</p>` : ""}</div></div>
+        <div style="text-align:center;margin-top:14px"><button class="btn" data-close="${e(id)}">OK</button></div></div>`,
+    });
+  }
+
+  /* ================= Minesweeper ================= */
+  function minesweeper(root) {
+    const N = 9, M = 10;
+    let cells, over, opened, flags, t0, timer, first;
+    root.innerHTML = `<div class="ms-head"><span class="ms-led" id="msMines"></span><button class="ms-face" id="msFace" type="button" aria-label="New game">🙂</button><span class="ms-led" id="msTime">000</span></div><div class="ms-grid" id="msGrid"></div>`;
+    const grid = $("#msGrid", root), face = $("#msFace", root);
+    const led = (el, n) => { el.textContent = String(Math.max(0, Math.min(999, n))).padStart(3, "0"); };
+    function reset() {
+      cells = Array.from({ length: N * N }, () => ({ m: false, o: false, f: false, n: 0 }));
+      over = false; opened = 0; flags = 0; first = true; clearInterval(timer); led($("#msTime", root), 0); led($("#msMines", root), M); face.textContent = "🙂";
+      grid.innerHTML = cells.map((_, i) => `<button type="button" data-i="${i}" aria-label="Cell ${i % N + 1}, ${Math.floor(i / N) + 1}"></button>`).join("");
+    }
+    const nb = (i) => { const x = i % N, y = Math.floor(i / N), out = []; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if (!dx && !dy) continue; const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < N && ny < N) out.push(ny * N + nx); } return out; };
+    function plant(safe) {
+      const avoid = new Set([safe, ...nb(safe)]); let k = 0;
+      while (k < M) { const i = Math.floor(Math.random() * N * N); if (cells[i].m || avoid.has(i)) continue; cells[i].m = true; k++; }
+      cells.forEach((c, i) => { c.n = nb(i).filter((j) => cells[j].m).length; });
+      t0 = Date.now(); timer = setInterval(() => led($("#msTime", root), Math.floor((Date.now() - t0) / 1000)), 500);
+    }
+    const COL = ["", "#0000ff", "#008000", "#ff0000", "#000080", "#800000", "#008080", "#000", "#808080"];
+    function reveal(i) {
+      const c = cells[i]; if (c.o || c.f) return;
+      c.o = true; opened++;
+      const b = grid.children[i]; b.classList.add("open"); b.textContent = c.n || ""; b.style.color = COL[c.n];
+      if (!c.n) nb(i).forEach(reveal);
+    }
+    function click(i) {
+      if (over) return;
+      if (first) { plant(i); first = false; }
+      const c = cells[i]; if (c.f || c.o) return;
+      if (c.m) {
+        over = true; clearInterval(timer); face.textContent = "😵";
+        cells.forEach((d, j) => { if (d.m) { grid.children[j].textContent = "💣"; grid.children[j].classList.add("open"); } });
+        grid.children[i].classList.add("boom"); return;
+      }
+      reveal(i);
+      if (opened === N * N - M) { over = true; clearInterval(timer); face.textContent = "😎"; }
+    }
+    function flag(i) {
+      const c = cells[i]; if (over || c.o) return;
+      c.f = !c.f; flags += c.f ? 1 : -1; grid.children[i].textContent = c.f ? "🚩" : ""; led($("#msMines", root), M - flags);
+    }
+    let press;
+    grid.addEventListener("pointerdown", (ev) => { const b = ev.target.closest("button"); if (!b || over) return; face.textContent = "😮"; press = setTimeout(() => { flag(+b.dataset.i); press = "flagged"; }, 450); });
+    grid.addEventListener("pointerup", (ev) => {
+      const b = ev.target.closest("button"); const was = press; clearTimeout(press); press = null;
+      if (!over) face.textContent = "🙂";
+      if (!b || was === "flagged" || ev.button === 2) return;
+      click(+b.dataset.i);
+    });
+    grid.addEventListener("contextmenu", (ev) => { ev.preventDefault(); const b = ev.target.closest("button"); clearTimeout(press); press = null; if (b) flag(+b.dataset.i); });
+    face.onclick = reset;
+    reset();
+  }
+
+  /* ================= Desktop, Start menu, taskbar ================= */
+  const DESK = [
+    ["about", "notepad", "About Me"], ["experience", "folder", "Experience"], ["projects", "folder", "Projects"],
+    ["computer", "computer", "Education"], ["skills", "chip", "Skills"], ["resume", "pdf", "Resume"],
+    ["mail", "mail", "Contact"], ["mines", "mine", "Minesweeper"], ["recycle", "recycle", "Recycle Bin"],
+  ];
+  $("#quick").innerHTML = [["about", "notepad", "About"], ["experience", "folder", "Experience"], ["projects", "folder", "Projects"], ["skills", "chip", "Skills"], ["mail", "mail", "Contact"]]
+    .map(([id, ic, l]) => `<button type="button" class="btn" data-open="${id}" title="${e(l)}">${ICON[ic]}<span>${e(l)}</span></button>`).join("");
+  $("#icons").innerHTML = DESK.map(([id, ic, label]) => iconBtn(id, ic, label)).join("");
+  wireIcons($("#icons"), (id) => APPS[id] && APPS[id]());
+
+  const sm = $("#startmenu"), sb = $("#startBtn");
+  sm.innerHTML = `<div class="banner"><b>Grigory</b>98</div><ul>
+    ${[["projects", "folder", "Programs"], ["resume", "pdf", "Documents"], ["skills", "chip", "Settings"], ["computer", "computer", "Education"], ["mail", "mail", "Contact"], ["about", "help", "Help"]].map(([id, ic, l]) => `<li><button type="button" role="menuitem" data-open="${id}">${ICON[ic]}${e(l)}</button></li>`).join("")}
+    <li><hr></li>
+    <li><button type="button" role="menuitem" data-shutdown>${ICON.power}Shut Down…</button></li></ul>`;
+  const setStart = (open) => { sm.hidden = !open; sb.classList.toggle("on", open); sb.setAttribute("aria-expanded", String(open)); if (open) sm.querySelector("button").focus(); };
+  sb.onclick = (ev) => { ev.stopPropagation(); setStart(sm.hidden); };
+  document.addEventListener("pointerdown", (ev) => { if (!sm.hidden && !sm.contains(ev.target) && ev.target !== sb && !sb.contains(ev.target)) setStart(false); });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") setStart(false); });
+
+  document.addEventListener("click", (ev) => {
+    const o = ev.target.closest("[data-open]"); if (o) { setStart(false); APPS[o.dataset.open](); return; }
+    const c = ev.target.closest("[data-close]"); if (c) { close(c.dataset.close); return; }
+    if (ev.target.closest("[data-shutdown]")) { setStart(false); shutdown(); }
+  });
+
+  function shutdown() {
+    const sd = $("#shutdown"); sd.hidden = false;
+    sd.innerHTML = `<section class="win active" style="position:relative;width:min(380px, calc(100vw - 20px))" role="dialog" aria-label="Shut Down Grigory 98">
+      <div class="title"><span>Shut Down Grigory 98</span><button type="button" class="x" data-sd="cancel" aria-label="Close">✕</button></div>
+      <div style="display:flex;gap:14px;padding:14px">${ICON.power}<div style="flex:1"><p style="margin:0 0 8px">What do you want the computer to do?</p>
+        <label style="display:block;margin:4px 0"><input type="radio" name="sd" value="off" checked> Shut down</label>
+        <label style="display:block;margin:4px 0"><input type="radio" name="sd" value="restart"> Restart (in another world)</label></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:6px;padding:0 10px 10px"><button class="btn" data-sd="ok">OK</button><button class="btn" data-sd="cancel">Cancel</button></div></section>`;
+    sd.querySelector("[data-sd=ok]").focus();
+    sd.onclick = (ev) => {
+      const b = ev.target.closest("[data-sd]"); if (!b) return;
+      sd.hidden = true;
+      if (b.dataset.sd !== "ok") return;
+      if (sd.querySelector("input:checked").value === "restart") return K.goAnother();
+      const safe = $("#safe"); safe.hidden = false; safe.onclick = () => K.goAnother();
+    };
+  }
+
+  function tick() { const d = new Date(); $("#clock").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+  tick(); setInterval(tick, 10000);
+
+  // Boot, then show the welcome tips window.
+  const boot = $("#boot");
+  setTimeout(() => { boot.classList.add("done"); APPS.welcome(); }, K.reduceMotion ? 0 : 1600);
+  const deep = location.hash.match(/open=([\w:]+)/);
+  if (deep) setTimeout(() => openItem(deep[1]), K.reduceMotion ? 50 : 1700);
+})();
+</script>
+</body>
+</html>

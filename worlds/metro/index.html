@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" data-world="metro" data-switcher="br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Shatalin Metro — Grigory Shatalin</title>
+<meta name="description" content="Grigory Shatalin, software engineer — a transit map of a career. Tap any station." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="../../shared/data.js"></script>
+<script src="../../shared/kit.js"></script>
+<style>
+:root { --bg: #f6f5f1; --ink: #141414; --mute: #74726c; --red: #e2231a; --blue: #0a6fd6; --green: #00994d; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; padding: clamp(18px, 3vw, 40px) clamp(18px, 4vw, 56px); gap: 12px; }
+header { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+.brand { display: flex; gap: 14px; align-items: center; }
+.roundel { width: 46px; height: 46px; border-radius: 50%; border: 9px solid var(--red); position: relative; flex: none; }
+.roundel::after { content: ""; position: absolute; left: -16px; right: -16px; top: 50%; height: 10px; margin-top: -5px; background: #1b2a6b; }
+h1 { margin: 0; font-size: clamp(26px, 3.4vw, 40px); font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.brand p { margin: 4px 0 0; color: var(--mute); font-size: 14px; }
+.tip { font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px 14px; border-radius: 99px; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.06); }
+.tip i { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 0 rgba(226,35,26,.5); animation: ping 1.8s infinite; }
+@keyframes ping { 70% { box-shadow: 0 0 0 10px rgba(226,35,26,0); } 100% { box-shadow: 0 0 0 0 rgba(226,35,26,0); } }
+.map { position: relative; display: grid; place-items: center; min-height: 0; transition: padding .45s cubic-bezier(.2,.8,.2,1); }
+@media (min-width: 761px) { body.carded .map svg { max-width: calc(100vw - 500px); } .map svg { transition: max-width .45s cubic-bezier(.2,.8,.2,1); margin-right: 0; } body.carded .map { justify-items: start; } }
+svg { width: 100%; height: auto; max-height: calc(100vh - 210px); display: block; overflow: visible; }
+.line { fill: none; stroke-linecap: round; stroke-linejoin: round; transition: opacity .3s; }
+.draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw 1.6s cubic-bezier(.6,0,.2,1) forwards; animation-delay: var(--d); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.st { cursor: pointer; outline: none; }
+.st circle, .st rect { fill: #fff; stroke: var(--ink); transition: transform .2s; transform-box: fill-box; transform-origin: center; }
+.st:hover circle, .st:hover rect, .st:focus-visible circle, .st:focus-visible rect { transform: scale(1.25); }
+.st.sel circle, .st.sel rect { fill: var(--ink); }
+.st text { font-weight: 600; fill: var(--ink); pointer-events: none; }
+.st .sub { font-weight: 400; fill: var(--mute); }
+.st:focus-visible text:first-of-type { text-decoration: underline; }
+.pop { opacity: 0; animation: pop .5s ease forwards; animation-delay: var(--d); }
+@keyframes pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.dim .line:not(.hl), .dim .st:not(.hl) { opacity: .18; }
+.here { fill: var(--red); }
+.legend { display: flex; gap: 10px 22px; flex-wrap: wrap; align-items: center; font-size: 14px; }
+.legend button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; padding: 6px 2px; color: var(--ink); font-weight: 500; }
+.legend button span { width: 30px; height: 7px; border-radius: 4px; }
+.legend button:hover, .legend button:focus-visible, .legend button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 4px; }
+.legend .dash span { background: repeating-linear-gradient(90deg, var(--blue) 0 7px, transparent 7px 11px) !important; }
+.legend .info { margin-left: auto; display: flex; gap: 8px; }
+.legend .info button { padding: 8px 14px; border-radius: 99px; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.06); }
+
+/* Station card */
+.card { position: fixed; z-index: 30; top: 50%; right: max(20px, env(safe-area-inset-right)); width: min(380px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow: auto;
+  background: #fff; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.06);
+  transform: translate(30px, -50%); opacity: 0; pointer-events: none; transition: opacity .3s, transform .45s cubic-bezier(.2,.8,.2,1); }
+.card.on { transform: translate(0, -50%); opacity: 1; pointer-events: auto; }
+.card .bar { height: 10px; border-radius: 16px 16px 0 0; }
+.card .in { padding: 22px 24px 24px; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+.badges span { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; padding: 4px 8px; border-radius: 4px; }
+.card h2 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.025em; line-height: 1.05; }
+.card .meta { margin: 6px 0 16px; color: var(--mute); font-size: 14px; }
+.card p.sum { font-size: 17px; line-height: 1.45; margin: 0 0 14px; }
+.card ul { margin: 0 0 14px; padding-left: 18px; font-size: 14.5px; line-height: 1.55; color: #3a3935; }
+.card li { margin-bottom: 6px; }
+.card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.card .tags span { font-size: 12px; padding: 4px 9px; border-radius: 99px; background: #f0efea; }
+.card a { color: var(--ink); font-weight: 600; }
+.card .row { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #eee; }
+.card .row button { all: unset; cursor: pointer; font-size: 14px; font-weight: 600; padding: 6px 4px; }
+.card .row button:hover, .card .row button:focus-visible { text-decoration: underline; }
+.card .x { position: absolute; top: 18px; right: 14px; all: unset; cursor: pointer; position: absolute; top: 20px; right: 16px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; font-size: 18px; color: var(--mute); }
+.card .x:hover, .card .x:focus-visible { background: #f0efea; color: var(--ink); }
+.contact a { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; text-decoration: none; font-weight: 500; }
+.contact a span { color: var(--mute); font-weight: 400; }
+@media (max-width: 760px) {
+  .tip { font-size: 13px; }
+  svg { max-height: none; }
+  .card { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; max-height: 66vh; transform: translateY(40px); }
+  .card.on { transform: none; }
+  .legend .info { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .draw { animation: none; stroke-dashoffset: 0; } .pop { animation: none; opacity: 1; } .tip i { animation: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="roundel" aria-hidden="true"></span><div><h1>Shatalin Metro</h1><p id="sub"></p></div></div>
+    <p class="tip"><i aria-hidden="true"></i>Tap any station to read about it</p>
+  </header>
+  <div class="map" id="map"></div>
+  <nav class="legend" id="legend" aria-label="Lines"></nav>
+</div>
+<aside class="card" id="card" role="dialog" aria-live="polite" aria-label="Station details"></aside>
+
+<script>
+(function () {
+  const P = window.PORTFOLIO, K = window.Kit, e = K.esc;
+  const $ = (s) => document.querySelector(s);
+  const ext = 'target="_blank" rel="noopener noreferrer"';
+  $("#sub").textContent = `${P.name} · ${P.role} · network map ${new Date().getFullYear()}`;
+  const X = Object.fromEntries(P.experience.map((x) => [x.id, x]));
+  const D = Object.fromEntries(P.education.map((x) => [x.id, x]));
+  const PR = Object.fromEntries(P.projects.map((x) => [x.id, x]));
+
+  const LINES = {
+    work: { name: "Work line", color: "var(--red)", hex: "#e2231a" },
+    study: { name: "Study line", color: "var(--blue)", hex: "#0a6fd6" },
+    proj: { name: "Projects line", color: "var(--green)", hex: "#00994d" },
+  };
+
+  /* Stations on a landscape grid (1000 × 600). Time runs left → right.
+     side = where the label sits (above/below); portrait transposes x↔y. */
+  const ST = [
+    { id: "akvelon", p: [150, 110], pside: "right", x: 140, y: 200, lines: ["work"], side: "above", title: X.akvelon.orgShort, sub: "2023" },
+    { id: "lwtech", p: [420, 140], pside: "right", x: 220, y: 420, lines: ["study"], side: "below", title: D.lwtech.schoolShort, sub: "2024" },
+    { id: "isat", p: [260, 420], pside: "left", x: 470, y: 300, lines: ["work", "study", "proj"], side: "above", title: "CU Boulder · iSAT", sub: "", inter: true },
+    { id: "circle", p: [150, 620], pside: "right", x: 640, y: 300, lines: ["work"], side: "below", title: X.circle.orgShort, sub: "2026" },
+    { id: "aws", p: [150, 800], pside: "right", x: 880, y: 220, lines: ["work"], side: "below", title: X.aws.orgShort, sub: "Now", here: true },
+    { id: "grad", p: [520, 420], pside: "above", x: 900, y: 120, lines: ["study"], side: "above", title: "Graduation", sub: "May 2027", future: true },
+    { id: "buffai", p: [380, 600], pside: "right", x: 560, y: 490, lines: ["proj"], side: "below", title: PR.buffai.name, sub: "" },
+    { id: "solana", p: [380, 680], pside: "right", x: 690, y: 490, lines: ["proj"], side: "above", title: "Circle × Solana", sub: "" },
+    { id: "endurance", p: [380, 760], pside: "right", x: 800, y: 490, lines: ["proj"], side: "below", title: PR.endurance.name, sub: "" },
+    { id: "modeltraining", p: [380, 840], pside: "right", x: 910, y: 490, lines: ["proj"], side: "above", title: PR.modeltraining.name, sub: "" },
+  ];
+  const PATHS = [
+    { line: "work", pts: [[140, 200], [260, 200], [360, 300], [640, 300], [700, 300], [780, 220], [880, 220]] },
+    { line: "study", pts: [[220, 420], [350, 420], [470, 300], [470, 180], [530, 120], [640, 120]] },
+    { line: "study", pts: [[640, 120], [900, 120]], dashed: true },
+    { line: "proj", pts: [[470, 300], [470, 430], [530, 490], [910, 490]] },
+  ];
+
+  const PATHS_P = [
+    { line: "work", pts: [[150, 110], [150, 310], [260, 420], [150, 530], [150, 800]] },
+    { line: "study", pts: [[420, 140], [420, 260], [260, 420]] },
+    { line: "study", pts: [[260, 420], [520, 420]], dashed: true },
+    { line: "proj", pts: [[260, 420], [380, 540], [380, 840]] },
+  ];
+
+  /* Station content */
+  function content(id) {
+    const linesOf = ST.find((s) => s.id === id).lines;
+    const badges = `<div class="badges">${linesOf.map((l) => `<span style="background:${LINES[l].hex}">${e(LINES[l].name)}</span>`).join("")}</div>`;
+    const exp = (x) => `${badges}<h2>${e(x.org)}</h2><p class="meta">${e(x.role)}${x.team ? " · " + e(x.team) : ""} · ${e(x.dates)}</p>
+      <p class="sum">${e(x.summary)}</p><ul>${x.bullets.slice(0, 2).map((b) => `<li>${e(b)}</li>`).join("")}</ul>
+      ${x.link ? `<p><a href="${e(x.link.href)}" ${ext}>${e(x.link.label)} ↗</a></p>` : ""}<div class="tags">${x.tags.map((t) => `<span>${e(t)}</span>`).join("")}</div>`;
+    const proj = (p) => `${badges}<h2>${e(p.name)}</h2><p class="meta">${e(p.status)}</p><p class="sum">${e(p.tagline)}</p>
+      <ul><li>${e(p.desc)}</li></ul><p><a href="${e(p.url)}" ${ext}>View on GitHub ↗</a></p><div class="tags">${p.tags.map((t) => `<span>${e(t)}</span>`).join("")}</div>`;
+    if (X[id] && id !== "isat") return exp(X[id]);
+    if (id === "isat") {
+      const cu = D.cu, x = X.isat;
+      return `${badges}<h2>CU Boulder</h2><p class="meta">Interchange · ${e(cu.location)}</p>
+        <p class="sum">${e(cu.degree)} · GPA ${e(cu.gpa)} · ${e(cu.dates)}</p>
+        <ul><li><b>${e(x.orgShort)}</b> — ${e(x.role)}, ${e(x.dates)}. ${e(x.summary)}</li><li><b>${e(PR.buffai.name)}</b> — ${e(PR.buffai.tagline)} Change here for the Projects line.</li></ul>
+        <div class="tags">${x.tags.map((t) => `<span>${e(t)}</span>`).join("")}</div>`;
+    }
+    if (id === "lwtech") { const d = D.lwtech; return `${badges}<h2>${e(d.school)}</h2><p class="meta">${e(d.location)} · ${e(d.dates)}</p><p class="sum">${e(d.degree)} · GPA ${e(d.gpa)}</p>`; }
+    if (id === "grad") { const d = D.cu; return `${badges}<h2>Graduation</h2><p class="meta">Under construction · ${e(d.dates)}</p><p class="sum">${e(d.degree)}, ${e(d.school)}.</p>`; }
+    if (PR[id]) return proj(PR[id]);
+    if (id === "solana") return proj(PR.solana);
+    return "";
+  }
+  const ORDER = ["akvelon", "lwtech", "isat", "circle", "aws", "grad", "buffai", "solana", "endurance", "modeltraining"];
+
+  /* ---------------- Render map ---------------- */
+  let portrait = false;
+  const T = (x, y) => [x, y];
+  const pos = (s) => portrait ? s.p : [s.x, s.y];
+  const paths = () => portrait ? PATHS_P : PATHS;
+  function render() {
+    portrait = innerWidth < 760;
+    const vb = portrait ? "0 50 600 860" : "60 40 920 540";
+    const fs = portrait ? 22 : 15, sw = portrait ? 12 : 9, r = portrait ? 10 : 8;
+    const ptsStr = (pts) => pts.map(([x, y]) => T(x, y).join(",")).join(" ");
+    let html = `<svg viewBox="${vb}" role="img" aria-label="Transit map of ${e(P.name)}'s career">`;
+    paths().forEach((p, i) => {
+      html += `<polyline class="line${p.dashed ? " pop" : " draw"}" data-line="${p.line}" points="${ptsStr(p.pts)}" stroke="${LINES[p.line].color}" stroke-width="${sw}" ${p.dashed ? `stroke-dasharray="1 ${sw * 2.2}" style="--d:1.6s"` : `style="--d:${i * .45}s"`}/>`;
+    });
+    // little trains
+    html += `<g id="trains"></g>`;
+    ST.forEach((s, i) => {
+      const [x, y] = pos(s);
+      const side = portrait ? (s.pside || (s.side === "above" ? "left" : "right")) : s.side;
+      const dx = side === "left" ? -18 : side === "right" ? 18 : 0, dy = side === "above" ? -20 : side === "below" ? 30 : 6;
+      const anchor = side === "left" ? "end" : side === "right" ? "start" : "middle";
+      const shape = s.inter
+        ? (portrait ? `<rect x="${x - r - 4}" y="${y - r - 14}" width="${(r + 4) * 2}" height="${(r + 14) * 2}" rx="${r + 4}" stroke-width="3.5"/>` : `<rect x="${x - r - 14}" y="${y - r - 4}" width="${(r + 14) * 2}" height="${(r + 4) * 2}" rx="${r + 4}" stroke-width="3.5"/>`)
+        : `<circle cx="${x}" cy="${y}" r="${r}" stroke-width="3.5" ${s.future ? 'stroke-dasharray="3 3"' : ""}/>`;
+      const above = side === "above";
+      const ly = (s.inter && !portrait ? (above ? y - 26 : y + 38) : y + dy) - (above && s.sub ? fs * 1.15 : 0);
+      const lx = s.inter && portrait ? x + (side === "left" ? -30 : 30) : x + dx;
+      html += `<g class="st pop" tabindex="0" role="button" data-id="${s.id}" data-lines="${s.lines.join(" ")}" style="--d:${.6 + i * .08}s" aria-label="${e(s.title)}${s.sub ? ", " + e(s.sub) : ""}">
+        ${s.here ? `<circle class="here" cx="${x}" cy="${y}" r="${r + 10}" opacity=".18"><animate attributeName="r" values="${r + 4};${r + 18};${r + 4}" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".35;0;.35" dur="2.2s" repeatCount="indefinite"/></circle>` : ""}
+        ${shape}
+        <text x="${lx}" y="${ly}" text-anchor="${anchor}" font-size="${fs}">${e(s.title)}</text>
+        ${s.sub ? `<text class="sub" x="${lx}" y="${ly + fs * 1.15}" text-anchor="${anchor}" font-size="${fs * .82}">${e(s.sub)}${s.here ? " · you are here" : ""}</text>` : ""}
+      </g>`;
+    });
+    html += `</svg>`;
+    $("#map").innerHTML = html;
+    document.querySelectorAll(".line.draw").forEach((l) => l.style.setProperty("--len", Math.ceil(l.getTotalLength())));
+    document.querySelectorAll(".st").forEach((g) => {
+      g.addEventListener("click", () => open(g.dataset.id));
+      g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open(g.dataset.id); } });
+    });
+    if (openId) mark(openId);
+  }
+
+  /* ---------------- Trains moving along the lines ---------------- */
+  let trains = [];
+  function setupTrains() {
+    trains = [...document.querySelectorAll(".line")].filter((l, i) => !paths()[i].dashed).map((l, i) => ({ l, len: l.getTotalLength(), k: Math.random(), dir: 1, color: l.getAttribute("stroke") }));
+  }
+  function tick(now) {
+    const g = document.getElementById("trains");
+    if (g && trains.length && !K.reduceMotion) {
+      g.innerHTML = trains.map((t) => {
+        t.k += t.dir * .0012; if (t.k > 1 || t.k < 0) { t.dir *= -1; t.k = Math.max(0, Math.min(1, t.k)); }
+        const p = t.l.getPointAtLength(t.k * t.len);
+        return `<circle cx="${p.x}" cy="${p.y}" r="${portrait ? 5 : 4}" fill="#fff" stroke="${t.color}" stroke-width="2.5"/>`;
+      }).join("");
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- Card ---------------- */
+  let openId = null;
+  const card = $("#card");
+  function mark(id) {
+    document.querySelectorAll(".st").forEach((g) => g.classList.toggle("sel", g.dataset.id === id));
+  }
+  function open(id) {
+    openId = id; mark(id);
+    const s = ST.find((x) => x.id === id), color = LINES[s.lines[0]].hex, i = ORDER.indexOf(id);
+    card.innerHTML = `<div class="bar" style="background:${color}"></div><button class="x" type="button" aria-label="Close">✕</button><div class="in">${content(id)}
+      <div class="row"><button type="button" data-step="-1">← ${e(ST.find((x) => x.id === ORDER[(i - 1 + ORDER.length) % ORDER.length]).title)}</button><button type="button" data-step="1">${e(ST.find((x) => x.id === ORDER[(i + 1) % ORDER.length]).title)} →</button></div></div>`;
+    card.classList.add("on"); document.body.classList.add("carded");
+    card.querySelector(".x").focus({ preventScroll: true });
+  }
+  function close() { card.classList.remove("on"); document.body.classList.remove("carded"); openId = null; mark(null); }
+  card.addEventListener("click", (ev) => {
+    if (ev.target.closest(".x")) return close();
+    const b = ev.target.closest("[data-step]"); if (b) { const i = ORDER.indexOf(openId); open(ORDER[(i + +b.dataset.step + ORDER.length) % ORDER.length]); }
+  });
+  addEventListener("keydown", (ev) => { if (ev.key === "Escape") close(); });
+  document.addEventListener("click", (ev) => { if (openId && !card.contains(ev.target) && !ev.target.closest(".st, .legend")) close(); });
+
+  /* ---------------- Legend ---------------- */
+  $("#legend").innerHTML = Object.entries(LINES).map(([k, l]) => `<button type="button" data-line="${k}" aria-pressed="false"><span style="background:${l.hex}"></span>${e(l.name)}</button>`).join("") +
+    `<button type="button" class="dash" data-line="study" aria-hidden="true" tabindex="-1" style="pointer-events:none;color:var(--mute)"><span></span>Under construction</button>
+     <div class="info"><button type="button" data-info="skills">Skills</button><button type="button" data-info="contact">Contact</button></div>`;
+  let active = null;
+  $("#legend").addEventListener("click", (ev) => {
+    const info = ev.target.closest("[data-info]");
+    if (info) return openInfo(info.dataset.info);
+    const b = ev.target.closest("[data-line]"); if (!b) return;
+    const k = b.dataset.line; active = active === k ? null : k;
+    document.querySelectorAll(".legend [data-line]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.line === active)));
+    const svg = document.querySelector("#map svg"); svg.classList.toggle("dim", !!active);
+    svg.querySelectorAll(".line").forEach((l) => l.classList.toggle("hl", l.dataset.line === active));
+    svg.querySelectorAll(".st").forEach((g) => g.classList.toggle("hl", (g.dataset.lines || "").split(" ").includes(active)));
+  });
+  function openInfo(kind) {
+    openId = null; mark(null);
+    card.innerHTML = `<div class="bar" style="background:#141414"></div><button class="x" type="button" aria-label="Close">✕</button><div class="in">` + (kind === "skills"
+      ? `<h2>Skills</h2><p class="meta">What runs on this network</p>${P.skills.map((s) => `<p style="margin:0 0 12px"><b>${e(s.group)}</b><br><span style="color:#3a3935">${e(s.items.join(", "))}</span></p>`).join("")}`
+      : `<h2>Contact</h2><p class="meta">${e(P.intro)}</p><div class="contact">${P.contacts.map((c) => `<a href="${e(c.href)}" ${c.id === "email" ? "" : ext}>${e(c.label)} <span>${e(c.handle)}</span></a>`).join("")}</div>`) + `</div>`;
+    card.classList.add("on"); document.body.classList.add("carded"); card.querySelector(".x").focus({ preventScroll: true });
+  }
+
+  let rz, lastPortrait = null;
+  addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if ((innerWidth < 760) !== lastPortrait) { lastPortrait = innerWidth < 760; render(); setupTrains(); } }, 120); });
+  const boot = () => { lastPortrait = innerWidth < 760; render(); setupTrains(); const m = location.hash.match(/st=(\w+)/); if (m) open(m[1]); };
+  document.fonts ? document.fonts.ready.then(boot) : boot();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
