@@ -11,6 +11,7 @@
 (function () {
   const ROOT = new URL("..", document.currentScript.src).href;
   const INDEX = location.protocol === "file:" ? "index.html" : "";
+  const LANDING = "metro"; // the front door: every fresh visit starts here
   const CYCLE_KEY = "gs-world-cycle"; // {"order":[ids…], "i": index of the world last shown}
 
   const WORLDS = [
@@ -51,7 +52,8 @@
     cycle() {
       let c = null;
       try { c = JSON.parse(safeGet(CYCLE_KEY)); } catch (_) {}
-      const ids = WORLDS.map((w) => w.id);
+      // The landing world is never part of the random rotation.
+      const ids = WORLDS.map((w) => w.id).filter((id) => id !== LANDING);
       const valid = c && Array.isArray(c.order) && c.order.length === ids.length &&
         ids.every((id) => c.order.includes(id)) && Number.isInteger(c.i);
       if (!valid) {
@@ -71,11 +73,11 @@
       return c.order[(c.i + 1) % c.order.length];
     },
 
-    // Called by the root loader: honour ?world=<id>, otherwise take the next
-    // world in this browser's cycle.
+    // Called by the root loader: honour ?world=<id>, otherwise always land
+    // on the landing world. Randomizing happens from inside the worlds.
     goRandom() {
       const q = new URLSearchParams(location.search).get("world");
-      const id = WORLDS.some((w) => w.id === q) ? q : Kit.nextInCycle();
+      const id = WORLDS.some((w) => w.id === q) ? q : LANDING;
       location.replace(Kit.worldUrl(id));
     },
 
@@ -149,7 +151,7 @@
         `<div class="gs-switch-menu" id="gs-switch-menu" hidden>` +
         `<p>${WORLDS.length} worlds, one person. You're in <b>${e(here)}</b>.</p>` +
         `<ol>${WORLDS.map((w, i) => `<li><a href="${Kit.worldUrl(w.id)}"${w.id === cur ? ' aria-current="page"' : ""} title="${e(w.blurb)}"><span>${String(i + 1).padStart(2, "0")}</span>${e(w.name)}</a></li>`).join("")}</ol>` +
-        `<div class="gs-switch-row"><a href="#" data-shuffle>Surprise me</a><a href="${ROOT}classic/${INDEX}">Original</a></div></div>`;
+        `<div class="gs-switch-row"><a href="#" data-shuffle>Randomize website</a><a href="${ROOT}classic/${INDEX}">Original</a></div></div>`;
       document.body.appendChild(wrap);
 
       const btn = wrap.querySelector("button");
@@ -175,7 +177,7 @@
     // Refreshing a world moves on to the next one in the cycle; arriving any
     // other way (link, typed URL, back/forward) shows the world asked for.
     const nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
-    if (nav && nav.type === "reload") {
+    if (nav && nav.type === "reload" && world !== LANDING) {
       const next = Kit.nextInCycle();
       // Only advance if this world is the one the cycle last showed; a reload
       // of a deep-linked world first joins the cycle at that world.

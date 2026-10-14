@@ -1,6 +1,6 @@
 # Digital Portfolio
 
-Personal portfolio site for Grigory Shatalin — nine completely different interactive websites built around the same person. Every visit shows one of them, and each refresh moves on to the next. Vanilla HTML, CSS, JavaScript and canvas; no frameworks, no build step, no analytics.
+Personal portfolio site for Grigory Shatalin — nine completely different interactive websites built around the same person. Every visit starts on the metro map, with a button to randomize into the others. Vanilla HTML, CSS, JavaScript and canvas; no frameworks, no build step, no analytics.
 
 ## The worlds
 
@@ -27,9 +27,7 @@ The previous single-page site lives on at `classic/`.
 
 ### Which world you see
 
-Each browser gets its own random order of the worlds, stored in `localStorage` (`gs-world-cycle`). Visiting the root or refreshing a world advances one step, so nothing repeats until all of them have been seen, and then the order starts again from the first. Opening a world's URL directly (or `/?world=train`) shows that world without skipping ahead.
-
-The switch button in each world (`01/9` etc.) lists them all, plus "Surprise me" and the original site.
+Every visit lands on **Shatalin Metro**. Its **Randomize website** button (also in the corner switcher of every world) jumps to another world, using a per-browser random order stored in `localStorage` (`gs-world-cycle`) so nothing repeats until all of them have been seen. Refreshing any world other than the metro also moves on to the next one. `/?world=train` opens a specific world.
 
 ## Running locally
 

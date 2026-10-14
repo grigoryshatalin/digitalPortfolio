@@ -21,6 +21,10 @@ header { display: flex; justify-content: space-between; align-items: flex-end; g
 .roundel::after { content: ""; position: absolute; left: -16px; right: -16px; top: 50%; height: 10px; margin-top: -5px; background: #1b2a6b; }
 h1 { margin: 0; font-size: clamp(26px, 3.4vw, 40px); font-weight: 700; letter-spacing: -.03em; line-height: 1; }
 .brand p { margin: 4px 0 0; color: var(--mute); font-size: 14px; }
+.head-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.rand { font: 600 14px Inter, sans-serif; color: #fff; background: var(--ink); border: 0; border-radius: 99px; padding: 11px 18px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; transition: transform .2s, background .2s; }
+.rand:hover { background: var(--red); transform: translateY(-1px); }
+.rand:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
 .tip { font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px 14px; border-radius: 99px; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.06); }
 .tip i { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 0 rgba(226,35,26,.5); animation: ping 1.8s infinite; }
 @keyframes ping { 70% { box-shadow: 0 0 0 10px rgba(226,35,26,0); } 100% { box-shadow: 0 0 0 0 rgba(226,35,26,0); } }
@@ -87,7 +91,10 @@ svg { width: 100%; height: auto; max-height: calc(100vh - 210px); display: block
 <div class="wrap">
   <header>
     <div class="brand"><span class="roundel" aria-hidden="true"></span><div><h1>Shatalin Metro</h1><p id="sub"></p></div></div>
-    <p class="tip"><i aria-hidden="true"></i>Tap any station to read about it</p>
+    <div class="head-actions">
+      <p class="tip"><i aria-hidden="true"></i>Tap any station to read about it</p>
+      <button class="rand" id="rand" type="button" title="Jump to one of the other versions of this site">Randomize website <span aria-hidden="true">⤨</span></button>
+    </div>
   </header>
   <div class="map" id="map"></div>
   <nav class="legend" id="legend" aria-label="Lines"></nav>
@@ -99,6 +106,7 @@ svg { width: 100%; height: auto; max-height: calc(100vh - 210px); display: block
   const P = window.PORTFOLIO, K = window.Kit, e = K.esc;
   const $ = (s) => document.querySelector(s);
   const ext = 'target="_blank" rel="noopener noreferrer"';
+  $("#rand").onclick = () => K.goAnother();
   $("#sub").textContent = `${P.name} · ${P.role} · network map ${new Date().getFullYear()}`;
   const X = Object.fromEntries(P.experience.map((x) => [x.id, x]));
   const D = Object.fromEntries(P.education.map((x) => [x.id, x]));
